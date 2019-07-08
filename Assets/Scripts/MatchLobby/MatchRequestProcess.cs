@@ -14,7 +14,7 @@ public class MatchRequestProcess : MonoBehaviour
     private void Start()
     {
         m_Dropdown.ClearOptions();
-        var addresses = NetproNetworkManager.Instance.GetSelfIpAddresses();
+        var addresses = NetproNetworkManager.Instance.FindSelfIpAddresses();
         var list = new List<Dropdown.OptionData>();
         foreach (var addr in addresses)
         {

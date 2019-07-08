@@ -11,29 +11,24 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// TcpClientの送受信を簡易にしたクラス
 /// </summary>
-public class NetproTcpClient : INetproClient
+public class NetproTcpClient : NetproClientBase
 {
-    private static readonly string DATA_SPLITTER = "::=::";
-    private static readonly string RECEIVE_DATA_MATCHER = string.Format("{0}{1}{0}", DATA_SPLITTER, ".*?");
-
-    private Thread m_ReceiveThread;
     private StreamReader m_StreamReader;
     private StreamWriter m_StreamWriter;
-    private StringBuilder m_StringBuilder = new StringBuilder();
-    private Queue<string> m_ReceiveQueue = new Queue<string>();
 
-    private object m_SyncObject = new object();
+
 
     /// <summary>
-    /// TcpClient本体
+    /// TcpClient本体。
     /// </summary>
     public TcpClient TcpClient { get; private set; }
 
-    /// <summary>
-    /// 受信時コールバック
-    /// </summary>
-    public Action OnReceive { get; set; }
 
+
+    /// <summary>
+    /// コンストラクタ。
+    /// </summary>
+    /// <param name="tcpClient">TcpClient本体</param>
     public NetproTcpClient(TcpClient tcpClient)
     {
         TcpClient = tcpClient;
@@ -43,30 +38,12 @@ public class NetproTcpClient : INetproClient
         m_StreamWriter = new StreamWriter(networkStream, Encoding.UTF8);
     }
 
-    ~NetproTcpClient()
-    {
-        End();
-    }
+
 
     /// <summary>
-    /// 受け付けを開始する
+    /// 接続を終了する。
     /// </summary>
-    public void Start()
-    {
-        if (m_ReceiveThread != null && m_ReceiveThread.IsAlive)
-        {
-            m_ReceiveThread.Abort();
-            m_ReceiveThread = null;
-        }
-
-        m_ReceiveThread = new Thread(Receive);
-        m_ReceiveThread.Start();
-    }
-
-    /// <summary>
-    /// 接続を終了する
-    /// </summary>
-    public void End()
+    public override void EndClient()
     {
         Debug.LogError("TCP END!");
         if (OnReceive != null)
@@ -214,11 +191,11 @@ public class NetproTcpClient : INetproClient
             }
             catch (ObjectDisposedException ode)
             {
-                End();
+                EndClient();
             }
             catch (SocketException se)
             {
-                End();
+                EndClient();
             }
         }
     }

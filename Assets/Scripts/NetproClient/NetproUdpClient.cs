@@ -60,9 +60,9 @@ public class NetproUdpClient : INetproClient
     }
 
     /// <summary>
-    /// 接続を終了する
+    /// 接続を終了する。
     /// </summary>
-    public void End()
+    public  void End()
     {
         Debug.LogError("UDP END!");
         if (OnReceive != null)

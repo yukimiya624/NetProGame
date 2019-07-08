@@ -27,8 +27,6 @@ public class NetproApiClient : WebClient
         Encoding = Encoding.UTF8;
 
         var uri = new Uri(url);
-        //var webRequest = GetWebRequest(uri);
-        //webRequest.Timeout = timeout;
 
         m_OnUploadDataComplete = callBack;
         UploadDataCompleted += m_UploadDataCompleteEventHandler;

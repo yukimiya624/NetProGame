@@ -2277,12 +2277,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30e3c08a586b1484b9624640fcf2c3e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UseLocalServer: 0
-  m_LocalServerUrl: http://localhost:8080/match
   m_RemoteServerUrl: http://gamugames.cipher.jp/cgi-bin/server.cgi/match
   m_P2Pport: 2059
-  m_UseSpecifiedAddress: 0
-  m_SpecifiledAddress: 25.50.64.36
 --- !u!4 &749873019
 Transform:
   m_ObjectHideFlags: 0

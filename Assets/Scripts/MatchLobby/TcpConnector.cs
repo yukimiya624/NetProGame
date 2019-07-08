@@ -49,7 +49,7 @@ public class TcpConnector : MonoBehaviour
 
         m_Client = new NetproTcpClient(tcpClient);
         m_Client.OnReceive += OnReceive;
-        m_Client.Start();
+        m_Client.StartReceive();
 
         Debug.Log("Connect!");
         m_Client.SendData("Hello I'm " + Dns.GetHostName(), null);
@@ -59,7 +59,7 @@ public class TcpConnector : MonoBehaviour
     {
         m_Client = new NetproTcpClient((TcpClient) result.AsyncState);
         m_Client.OnReceive += OnReceive;
-        m_Client.Start();
+        m_Client.StartReceive();
 
         Debug.Log("Connect!");
         m_Client.SendData("Hello I'm " + Dns.GetHostName(), null);
