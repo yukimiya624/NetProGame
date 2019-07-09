@@ -9,28 +9,27 @@ using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
 
-public class NetproUdpClient : INetproClient
+/// <summary>
+/// UdpClientの送受信を簡易にしたクラス。
+/// Created by Sho Yamagami.
+/// </summary>
+public class NetproUdpClient : NetproClientBase
 {
-    private static readonly string DATA_SPLITTER = "::=::";
-    private static readonly string RECEIVE_DATA_MATCHER = string.Format("{0}{1}{0}", DATA_SPLITTER, ".*?");
-
+    /// <summary>
+    /// 通信相手のエンドポイント。
+    /// </summary>
     private IPEndPoint m_OpponentEndPoint;
-    private Thread m_ReceiveThread;
-    private StringBuilder m_StringBuilder = new StringBuilder();
-    private Queue<string> m_ReceiveQueue = new Queue<string>();
-
-    private object m_SyncObject = new object();
 
     /// <summary>
-    /// UdpClient本体
+    /// UdpClient本体。
     /// </summary>
     public UdpClient UdpClient { get; private set; }
 
     /// <summary>
-    /// 受信時コールバック
+    /// コンストラクタ。
     /// </summary>
-    public Action OnReceive { get; set; }
-
+    /// <param name="opponentAddress">通信相手のIPv4アドレス</param>
+    /// <param name="port">ポート</param>
     public NetproUdpClient(IPAddress opponentAddress, int port)
     {
         // UdpClientのコンストラクタで「自身の待ち受けポート」を指定する
@@ -39,64 +38,33 @@ public class NetproUdpClient : INetproClient
         m_OpponentEndPoint = new IPEndPoint(opponentAddress, port);
     }
 
-    ~NetproUdpClient()
-    {
-        End();
-    }
-
     /// <summary>
-    /// 受け付けを開始する
+    /// 接続を終了する。
     /// </summary>
-    public void Start()
+    public override void EndClient()
     {
-        if (m_ReceiveThread != null && m_ReceiveThread.IsAlive)
-        {
-            m_ReceiveThread.Abort();
-            m_ReceiveThread = null;
-        }
+        base.EndClient();
 
-        m_ReceiveThread = new Thread(Receive);
-        m_ReceiveThread.Start();
-    }
-
-    /// <summary>
-    /// 接続を終了する
-    /// </summary>
-    public void End()
-    {
-        Debug.LogError("UDP END!");
-        if (OnReceive != null)
-        {
-            OnReceive = null;
-        }
-
-        if (m_ReceiveThread != null)
-        {
-            m_ReceiveThread.Abort();
-            m_ReceiveThread = null;
-        }
+        Debug.LogError("NetproUdpClient : EndClient");
 
         if (UdpClient != null)
         {
             UdpClient.Close();
             UdpClient = null;
         }
-
-        if (m_StringBuilder != null)
-        {
-            m_StringBuilder.Clear();
-            m_StringBuilder = null;
-        }
     }
 
     /// <summary>
-    /// データを送信する
+    /// 文字列を送信する。
     /// </summary>
-    public void SendData(string data, Action failedSendCallback)
+    /// <param name="data">送信したい文字列</param>
+    /// <param name="failedSendCallback">送信に失敗した時のコールバック</param>
+    public override void SendData(string data, Action failedSendCallback)
     {
         if (UdpClient == null)
         {
-            Debug.LogError("UdpClientがありません。");
+            Debug.LogError("NetproUdpClient : UdpClientがありません。");
+            EventUtility.SafeInvokeAction(failedSendCallback);
             return;
         }
 
@@ -127,73 +95,30 @@ public class NetproUdpClient : INetproClient
     }
 
     /// <summary>
-    /// 受信したデータを取り出す
+    /// 受信スレッドでループさせるメソッド。
     /// </summary>
-    public string GetReceivedData()
-    {
-        if (m_ReceiveQueue == null || m_ReceiveQueue.Count < 1)
-        {
-            return null;
-        }
-
-        string data = null;
-        lock (m_SyncObject)
-        {
-            data = m_ReceiveQueue.Dequeue();
-        }
-
-        return data;
-    }
-
-    /// <summary>
-    /// 受信データが残っているかどうか
-    /// </summary>
-    public bool IsRemainReceivedData()
-    {
-        return m_ReceiveQueue != null && m_ReceiveQueue.Count > 0;
-    }
-
-    /// <summary>
-    /// 受信データを遅延評価で全取得する
-    /// </summary>
-    public IEnumerable GetAllReceivedData()
-    {
-        while (IsRemainReceivedData())
-        {
-            yield return GetReceivedData();
-        }
-    }
-
-    private void Receive()
+    protected override void ReceiveWork()
     {
         while (true)
         {
-            IPEndPoint remoteEp = null;
-            var receiveData = UdpClient.Receive(ref remoteEp);
-
-            var str = Encoding.UTF8.GetString(receiveData);
-            m_StringBuilder.Append(str);
-            var data = m_StringBuilder.ToString().Trim();
-
-            Debug.Log("str : " + str + ", data : " + data);
-            if (!string.IsNullOrEmpty(data))
+            try
             {
-                var matches = Regex.Matches(data, RECEIVE_DATA_MATCHER);
-                foreach (var m in matches)
-                {
-                    lock (m_SyncObject)
-                    {
-                        m_ReceiveQueue.Enqueue(m.ToString().Replace(DATA_SPLITTER, "").Trim());
-                    }
-                }
-
-                m_StringBuilder.Remove(0, m_StringBuilder.Length);
-                m_StringBuilder.Append(Regex.Replace(data, RECEIVE_DATA_MATCHER, ""));
-
-                if (matches.Count > 0)
-                {
-                    EventUtility.SafeInvokeAction(OnReceive);
-                }
+                IPEndPoint remoteEp = null;
+                var receiveData = UdpClient.Receive(ref remoteEp);
+                var str = Encoding.UTF8.GetString(receiveData);
+                StockReceiveString(str);
+            }
+            catch (ObjectDisposedException ode)
+            {
+                Debug.LogError("ソケットが閉じられました。");
+                Debug.LogException(ode);
+                EventUtility.SafeInvokeAction(OnReceiveFailed);
+            }
+            catch (SocketException se)
+            {
+                Debug.LogError("エラーが発生しました。");
+                Debug.LogException(se);
+                EventUtility.SafeInvokeAction(OnReceiveFailed);
             }
         }
     }

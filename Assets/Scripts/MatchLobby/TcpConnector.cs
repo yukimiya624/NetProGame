@@ -29,7 +29,7 @@ public class TcpConnector : MonoBehaviour
     {
         var addr = m_InputField.text;
         var ipAddr = IPAddress.Parse(addr);
-        NetproNetworkManager.Instance.OpenTcpServer(ipAddr, 2059, OnAcceptTcpClient);
+        NetproNetworkManager.Instance.AcceptTcpClient(ipAddr, 2059, OnAcceptTcpClient);
         Debug.Log("Wait connect... as " + ipAddr);
     }
 
@@ -37,7 +37,7 @@ public class TcpConnector : MonoBehaviour
     {
         var addr = m_InputField.text;
         var ipAddr = IPAddress.Parse(addr);
-        NetproNetworkManager.Instance.ConnectTcpServer(ipAddr, 2059, OnConnectTcpClient);
+        NetproNetworkManager.Instance.ConnectTcpClient(ipAddr, 2059, OnConnectTcpClient);
         Debug.Log("Connect server... to " + ipAddr);
     }
 
@@ -49,7 +49,7 @@ public class TcpConnector : MonoBehaviour
 
         m_Client = new NetproTcpClient(tcpClient);
         m_Client.OnReceive += OnReceive;
-        m_Client.Start();
+        m_Client.StartReceive();
 
         Debug.Log("Connect!");
         m_Client.SendData("Hello I'm " + Dns.GetHostName(), null);
@@ -59,7 +59,7 @@ public class TcpConnector : MonoBehaviour
     {
         m_Client = new NetproTcpClient((TcpClient) result.AsyncState);
         m_Client.OnReceive += OnReceive;
-        m_Client.Start();
+        m_Client.StartReceive();
 
         Debug.Log("Connect!");
         m_Client.SendData("Hello I'm " + Dns.GetHostName(), null);
@@ -67,7 +67,7 @@ public class TcpConnector : MonoBehaviour
 
     private void OnReceive()
     {
-        foreach (var a in m_Client.GetAllReceivedData())
+        foreach (var a in m_Client.GetAllReceivedDataByEnumeration())
         {
             Debug.LogWarning(a);
         }
