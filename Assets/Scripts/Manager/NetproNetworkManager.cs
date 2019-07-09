@@ -8,6 +8,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// クライアント通信の低レイヤーをサポートするマネージャ。
+/// Created by Sho Yamagami.
+/// </summary>
 public class NetproNetworkManager : MonoBehaviour
 {
     #region Field Inspector
@@ -53,6 +57,11 @@ public class NetproNetworkManager : MonoBehaviour
     /// シングルトンパターンのために使用。
     /// </summary>
     public static NetproNetworkManager Instance { get; private set; }
+
+    /// <summary>
+    /// 自分がマスタークライアントかどうか。
+    /// </summary>
+    public bool IsMasterClient { get; private set; }
 
     /// <summary>
     /// 通信に用いる、自身のクライアントPCのIPv4アドレス。
@@ -182,7 +191,7 @@ public class NetproNetworkManager : MonoBehaviour
 
 
     /// <summary>
-    /// 自身のPCのIPv4アドレスを取得する。
+    /// 自身のPCのIPv4アドレスを全て取得する。
     /// </summary>
     /// <returns>IPv4アドレスのリスト</returns>
     public List<IPAddress> FindSelfIpAddresses()
@@ -192,7 +201,7 @@ public class NetproNetworkManager : MonoBehaviour
 
         foreach (var address in addresses)
         {
-            // IPv4 のみ取得する
+            // IPv4のみ取得する
             if (address.AddressFamily == AddressFamily.InterNetwork)
             {
                 list.Add(address);
@@ -206,9 +215,9 @@ public class NetproNetworkManager : MonoBehaviour
     /// Tcpリスナとして、Tcpクライアントの接続を待ち受ける。
     /// </summary>
     /// <param name="address">自分自身のアドレス</param>
-    /// <param name="port"></param>
+    /// <param name="port">ポート</param>
     /// <param name="asyncCallback">接続完了時コールバック</param>
-    public void OpenTcpServer(IPAddress address, int port, Action<IAsyncResult> asyncCallback)
+    public void AcceptTcpClient(IPAddress address, int port, Action<IAsyncResult> asyncCallback)
     {
         var listener = new TcpListener(address, port);
         listener.Start();
@@ -221,7 +230,7 @@ public class NetproNetworkManager : MonoBehaviour
     /// <param name="address">相手のアドレス</param>
     /// <param name="port">ポート</param>
     /// <param name="asyncCallback">接続完了時コールバック</param>
-    public void ConnectTcpServer(IPAddress address, int port, Action<IAsyncResult> asyncCallback)
+    public void ConnectTcpClient(IPAddress address, int port, Action<IAsyncResult> asyncCallback)
     {
         var client = new TcpClient();
         client.BeginConnect(address, port, new AsyncCallback(asyncCallback), client);
@@ -249,7 +258,7 @@ public class NetproNetworkManager : MonoBehaviour
         }
 
         UdpClient = new NetproUdpClient(OpponentIpAddress, m_P2Pport);
-        UdpClient.Start();
+        UdpClient.StartReceive();
     }
 
     /// <summary>
@@ -265,7 +274,7 @@ public class NetproNetworkManager : MonoBehaviour
 
         if (UdpClient != null)
         {
-            UdpClient.End();
+            UdpClient.EndClient();
             UdpClient = null;
         }
     }
@@ -277,8 +286,8 @@ public class NetproNetworkManager : MonoBehaviour
     /// マッチリクエストを送る。
     /// </summary>
     /// <param name="address">マッチに用いる自身のIPv4アドレス</param>
-    /// <param name="seccessMatchCallback"></param>
-    /// <param name="failureRequestCallback"></param>
+    /// <param name="seccessMatchCallback">マッチに成功した時のコールバック</param>
+    /// <param name="failureRequestCallback">マッチに失敗した時のコールバック</param>
     public void RequestMatch(string address, Action seccessMatchCallback, Action failureRequestCallback = null)
     {
         IPAddress addr;
@@ -353,7 +362,7 @@ public class NetproNetworkManager : MonoBehaviour
             if (receiveData.Message == "OPEN_SERVER")
             {
                 // 他のクライアントを待ち受ける
-                OpenTcpServer(SelfIpAddress, m_P2Pport, OnAcceptTcpClient);
+                AcceptTcpClient(SelfIpAddress, m_P2Pport, OnAcceptTcpClient);
                 Debug.Log("Open Master Client as " + SelfIpAddress);
             }
             else if (receiveData.Message == "OPEN_CLIENT")
@@ -369,7 +378,7 @@ public class NetproNetworkManager : MonoBehaviour
 
                 // 待ち受けているクライアントに接続する
                 OpponentIpAddress = ipAddress;
-                ConnectTcpServer(OpponentIpAddress, m_P2Pport, OnConnectTcpClient);
+                ConnectTcpClient(OpponentIpAddress, m_P2Pport, OnConnectTcpClient);
                 Debug.Log("Connect Master Client to " + OpponentIpAddress);
             }
         }
@@ -399,6 +408,8 @@ public class NetproNetworkManager : MonoBehaviour
         var ep = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
         OpponentIpAddress = ep.Address;
 
+        IsMasterClient = true;
+
         // クライアント間の接続開始
         CreateNetproUdpClient();
         CreateNetproTcpClient(tcpClient);
@@ -414,6 +425,8 @@ public class NetproNetworkManager : MonoBehaviour
         Debug.Log("Connect Master Client!");
 
         var tcpClient = (TcpClient)result.AsyncState;
+
+        IsMasterClient = false;
 
         // クライアント間の接続開始
         CreateNetproUdpClient();

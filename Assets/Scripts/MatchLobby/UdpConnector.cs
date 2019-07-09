@@ -30,12 +30,12 @@ public class UdpConnector : MonoBehaviour
     {
         Debug.Log("Receive UDP...");
         m_Client.OnReceive += OnReceiveData;
-        m_Client.Start();
+        m_Client.StartReceive();
     }
 
     private void OnReceiveData()
     {
-        foreach (var data in m_Client.GetAllReceivedData())
+        foreach (var data in m_Client.GetAllReceivedDataByEnumeration())
         {
             Debug.Log("Receive : " + data);
         }

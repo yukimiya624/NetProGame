@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 
 /// <summary>
 /// クライアント間の通信を簡易にしたクラス。
+/// Created by Sho Yamagami.
 /// </summary>
 public abstract class NetproClientBase
 {
@@ -53,9 +54,19 @@ public abstract class NetproClientBase
 
     /// <summary>
     /// 何かしら受信した時に自動的に呼び出されるコールバック。
-    /// これに関数を登録しておけば、受信した時に自動的に呼び出される。
+    /// 
+    /// 引数無しの関数を用意して、
+    /// OnReceive += FunctionName;
+    /// とすれば、何かしら受信した時に自動的にその関数が呼び出されるようになる。
+    /// もしかしたら受信した瞬間に何か処理したいかもしれないので用意した。
+    /// 受信データを取得したい場合は別のメソッドを呼ぶこと。
     /// </summary>
     public Action OnReceive { get; set; }
+
+    /// <summary>
+    /// 受信に失敗した時に自動的に呼び出されるコールバック。
+    /// </summary>
+    public Action OnReceiveFailed { get; set; }
 
 
 
@@ -71,6 +82,7 @@ public abstract class NetproClientBase
 
     /// <summary>
     /// 受信を開始する。
+    /// これを呼び出さないと受信できない。
     /// </summary>
     public void StartReceive()
     {
@@ -89,11 +101,6 @@ public abstract class NetproClientBase
     /// </summary>
     public virtual void EndClient()
     {
-        if (OnReceive != null)
-        {
-            OnReceive = null;
-        }
-
         if (m_ReceiveThread != null)
         {
             m_ReceiveThread.Abort();
@@ -105,6 +112,16 @@ public abstract class NetproClientBase
             m_StringBuilder.Clear();
             m_StringBuilder = null;
         }
+
+        if (OnReceive != null)
+        {
+            OnReceive = null;
+        }
+
+        if (OnReceiveFailed != null)
+        {
+            OnReceiveFailed = null;
+        }
     }
 
     /// <summary>
@@ -115,38 +132,68 @@ public abstract class NetproClientBase
     public abstract void SendData(string data, Action failedSendCallback);
 
     /// <summary>
-    /// 受信データを一つ取得する。
+    /// 現在溜めている受信データの数を取得する。
     /// </summary>
-    /// <returns>受信した文字列</returns>
-    public string GetReceivedData()
+    public int GetReceivedDataNum()
     {
-        if (m_ReceiveQueue == null || m_ReceiveQueue.Count < 1)
+        if (m_ReceiveQueue == null)
         {
-            return null;
+            return 0;
         }
 
-        string data = null;
         lock (m_SyncObject)
         {
-            data = m_ReceiveQueue.Dequeue();
+            return m_ReceiveQueue.Count;
         }
-
-        return data;
     }
 
     /// <summary>
     /// 受信データが残っているかどうかを取得する。
+    /// 受信データが残っている場合はtrueを返す。
     /// </summary>
-    /// <returns>受信データが残っている場合はtrueを返す</returns>
     public bool IsRemainReceivedData()
     {
-        return m_ReceiveQueue != null && m_ReceiveQueue.Count > 0;
+        return GetReceivedDataNum() > 0;
     }
 
     /// <summary>
-    /// 受信データを遅延評価で全取得する。
+    /// 現在溜めている受信データの中から最も古くに受信したデータを一つ取得する。
     /// </summary>
-    public IEnumerable GetAllReceivedData()
+    public string GetReceivedData()
+    {
+        if (IsRemainReceivedData())
+        {
+            return null;
+        }
+
+        lock (m_SyncObject)
+        {
+            return m_ReceiveQueue.Dequeue();
+        }
+    }
+
+    /// <summary>
+    /// 現在溜めている全ての受信データを配列で取得する。
+    /// </summary>
+    public string[] GetAllReceivedDataByArray()
+    {
+        if (IsRemainReceivedData())
+        {
+            return null;
+        }
+
+        lock (m_SyncObject)
+        {
+            var ary = m_ReceiveQueue.ToArray();
+            m_ReceiveQueue.Clear();
+            return ary;
+        }
+    }
+
+    /// <summary>
+    /// 現在溜めている全ての受信データを遅延評価で取得する。
+    /// </summary>
+    public IEnumerable GetAllReceivedDataByEnumeration()
     {
         while (IsRemainReceivedData())
         {
@@ -161,7 +208,6 @@ public abstract class NetproClientBase
 
     /// <summary>
     /// 受信した文字列をストックする。
-    /// 文字列をストックした時にデータが抽出できた場合は、受信コールバックを呼び出す。
     /// </summary>
     /// <param name="receivedString">受信した文字列</param>
     protected void StockReceiveString(string receivedString)
@@ -169,24 +215,24 @@ public abstract class NetproClientBase
         m_StringBuilder.Append(receivedString);
         var data = m_StringBuilder.ToString().Trim();
 
-        if (!string.IsNullOrEmpty(data))
+        if (string.IsNullOrEmpty(data))
         {
-            var matches = Regex.Matches(data, RECEIVE_DATA_MATCHER);
-            foreach (var m in matches)
-            {
-                lock (m_SyncObject)
-                {
-                    m_ReceiveQueue.Enqueue(m.ToString().Replace(DATA_SPLITTER, "").Trim());
-                }
-            }
+            return;
+        }
 
-            m_StringBuilder.Remove(0, m_StringBuilder.Length);
+        var matches = Regex.Matches(data, RECEIVE_DATA_MATCHER);
+        foreach (var m in matches)
+        {
+            lock (m_SyncObject)
+            {
+                m_ReceiveQueue.Enqueue(m.ToString().Replace(DATA_SPLITTER, "").Trim());
+            }
+        }
+
+        if (matches.Count > 0)
+        {
+            m_StringBuilder.Clear();
             m_StringBuilder.Append(Regex.Replace(data, RECEIVE_DATA_MATCHER, ""));
-
-            if (matches.Count > 0)
-            {
-                EventUtility.SafeInvokeAction(OnReceive);
-            }
         }
     }
 }

@@ -3,28 +3,72 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// ゲーム全体の進行を管理するマネージャ。
+/// Created by Sho Yamagami.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
-    private enum E_State
+    /// <summary>
+    /// GameManagerのステート。
+    /// </summary>
+    public enum E_State
     {
         ROOM,
         BATTLE,
     }
 
-    public static GameManager Instance { get; private set; }
 
+    #region Field Inspector
+#pragma warning disable 649
 
+    /// <summary>
+    /// 自分側のプレイヤーオブジェクト。
+    /// </summary>
     [SerializeField]
     private GameObject m_SelfObj;
 
+    /// <summary>
+    /// 対戦相手側のプレイヤーオブジェクト。
+    /// </summary>
     [SerializeField]
     private GameObject m_OpponentObj;
 
-    [SerializeField]
+#pragma warning restore 649
+    #endregion
+
+
+
+    #region Field
+
+    /// <summary>
+    /// GameManagerのステート。
+    /// </summary>
+    private E_State m_State;
+
+    /// <summary>
+    /// 遷移中かどうか。
+    /// これの使い方が適当なので注意。
+    /// </summary>
     private bool m_IsTransition;
 
-    [SerializeField]
-    private E_State m_State;
+    #endregion
+
+
+
+    #region Property
+
+    /// <summary>
+    /// 自身のインスタンス。
+    /// シングルトンパターンのために使用。
+    /// </summary>
+    public static GameManager Instance { get; private set; }
+
+    #endregion
+
+
+
+    #region Unity Callback
 
     private void Awake()
     {
@@ -59,39 +103,61 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void UpdateOnRoom()
-    {
-        if (m_IsTransition)
-        {
-            m_State = E_State.BATTLE;
-            SceneManager.LoadScene(1);
-        }
-    }
+    #endregion
 
+
+
+    #region Match
+
+    /// <summary>
+    /// マッチリクエスト。
+    /// </summary>
+    /// <param name="address">通信に用いるIPv4アドレス</param>
     public void RequestMatch(string address)
     {
         if (!m_IsTransition)
         {
-            NetproNetworkManager.Instance.RequestMatch(address, OnMatchGameManager, OnFailedMatchRequest);
+            NetproNetworkManager.Instance.RequestMatch(address, OnSeccessMatch, OnFailedMatchRequest);
         }
     }
 
-    private void OnMatchGameManager()
+    /// <summary>
+    /// マッチに成功した時の処理。
+    /// </summary>
+    private void OnSeccessMatch()
     {
         m_IsTransition = true;
-        NetproNetworkManager.Instance.UdpClient.OnReceive += OnReceive;
     }
 
-    private void OnReceive()
-    {
-        Debug.LogWarning("On Receive UDP");
-    }
-
+    /// <summary>
+    /// マッチに失敗した時の処理。
+    /// </summary>
     private void OnFailedMatchRequest()
     {
         Debug.LogError("マッチ失敗");
     }
 
+    #endregion
+
+
+    /// <summary>
+    /// Roomステートの時のUpdate処理。
+    /// </summary>
+    private void UpdateOnRoom()
+    {
+        if (m_IsTransition)
+        {
+            m_State = E_State.BATTLE;
+
+            // Build Settings の2つ目に登録されているシーン(PreBattle)に遷移する
+            // Build Settings の登録順序によって変動するので注意
+            SceneManager.LoadScene(1);
+        }
+    }
+
+    /// <summary>
+    /// Battleステートの時のUpdate処理。
+    /// </summary>
     private void UpdateOnBattle()
     {
         if (m_SelfObj)
@@ -120,12 +186,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 自分自身の座標をUDPで送信する。
+    /// </summary>
     private void SendPosition(Vector3 pos)
     {
         var data = JsonUtility.ToJson(pos);
         NetproNetworkManager.Instance.UdpClient.SendData(data, null);
     }
 
+    /// <summary>
+    /// UDPで受信した敵の座標を取得する。
+    /// </summary>
     private Vector3? ReceivePosition()
     {
         var data = NetproNetworkManager.Instance.UdpClient.GetReceivedData();

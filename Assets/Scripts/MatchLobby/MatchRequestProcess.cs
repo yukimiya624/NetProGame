@@ -3,17 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// マッチリクエストを行うための一連の処理をまとめたコンポーネント。
+/// Create by Sho Yamagami.
+/// </summary>
 public class MatchRequestProcess : MonoBehaviour
 {
     [SerializeField]
-    private Dropdown m_Dropdown;
+    private Dropdown m_AddressDropdown;
 
     [SerializeField]
     private Button m_RequestMatchButton;
 
     private void Start()
     {
-        m_Dropdown.ClearOptions();
+        InitAddressDropDown();
+        m_RequestMatchButton.onClick.AddListener(OnClickRequestMatch);
+    }
+
+    /// <summary>
+    /// アドレスドロップダウンの初期化。
+    /// </summary>
+    private void InitAddressDropDown()
+    {
+        m_AddressDropdown.ClearOptions();
         var addresses = NetproNetworkManager.Instance.FindSelfIpAddresses();
         var list = new List<Dropdown.OptionData>();
         foreach (var addr in addresses)
@@ -22,16 +35,16 @@ public class MatchRequestProcess : MonoBehaviour
             data.text = addr.ToString();
             list.Add(data);
         }
-
-        m_Dropdown.AddOptions(list);
-
-        m_RequestMatchButton.onClick.AddListener(OnClickRequestMatch);
+        m_AddressDropdown.AddOptions(list);
     }
 
+    /// <summary>
+    /// マッチリクエストボタンを押した時の処理。
+    /// </summary>
     private void OnClickRequestMatch()
     {
-        var idx = m_Dropdown.value;
-        var data = m_Dropdown.options[idx];
+        var idx = m_AddressDropdown.value;
+        var data = m_AddressDropdown.options[idx];
         GameManager.Instance.RequestMatch(data.text);
     }
 }
