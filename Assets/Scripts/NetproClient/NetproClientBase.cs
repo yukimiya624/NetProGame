@@ -75,7 +75,7 @@ public abstract class NetproClientBase
     /// </summary>
     ~NetproClientBase()
     {
-        EndClient();
+        //EndClient();
     }
 
 
@@ -161,7 +161,7 @@ public abstract class NetproClientBase
     /// </summary>
     public string GetReceivedData()
     {
-        if (IsRemainReceivedData())
+        if (!IsRemainReceivedData())
         {
             return null;
         }
@@ -177,7 +177,7 @@ public abstract class NetproClientBase
     /// </summary>
     public string[] GetAllReceivedDataByArray()
     {
-        if (IsRemainReceivedData())
+        if (!IsRemainReceivedData())
         {
             return null;
         }

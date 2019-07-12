@@ -18,6 +18,12 @@ public class GameManager : MonoBehaviour
         BATTLE,
     }
 
+    public enum SEND_PROTOCOL
+    {
+        UDP,
+        TCP,
+    }
+
 
     #region Field Inspector
 #pragma warning disable 649
@@ -33,6 +39,12 @@ public class GameManager : MonoBehaviour
     /// </summary>
     [SerializeField]
     private GameObject m_OpponentObj;
+
+    /// <summary>
+    /// 送受信プロトコルタイプ。
+    /// </summary>
+    [SerializeField]
+    private SEND_PROTOCOL m_SendProtocol;
 
 #pragma warning restore 649
     #endregion
@@ -126,6 +138,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void OnSeccessMatch()
     {
+        Debug.Log("マッチ成功");
         m_IsTransition = true;
     }
 
@@ -152,6 +165,8 @@ public class GameManager : MonoBehaviour
             // Build Settings の2つ目に登録されているシーン(PreBattle)に遷移する
             // Build Settings の登録順序によって変動するので注意
             SceneManager.LoadScene(1);
+            NetproNetworkManager.Instance.UdpClient.OnReceiveFailed += OnConnectFailed;
+            NetproNetworkManager.Instance.TcpClient.OnReceiveFailed += OnConnectFailed;
         }
     }
 
@@ -192,7 +207,17 @@ public class GameManager : MonoBehaviour
     private void SendPosition(Vector3 pos)
     {
         var data = JsonUtility.ToJson(pos);
-        NetproNetworkManager.Instance.UdpClient.SendData(data, null);
+
+        NetproClientBase client = null;
+        if (m_SendProtocol == SEND_PROTOCOL.UDP)
+        {
+            client = NetproNetworkManager.Instance.UdpClient;
+        } else
+        {
+            client = NetproNetworkManager.Instance.TcpClient;
+        }
+
+        client.SendData(data, OnConnectFailed);
     }
 
     /// <summary>
@@ -200,7 +225,17 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private Vector3? ReceivePosition()
     {
-        var data = NetproNetworkManager.Instance.UdpClient.GetReceivedData();
+        NetproClientBase client = null;
+        if (m_SendProtocol == SEND_PROTOCOL.UDP)
+        {
+            client = NetproNetworkManager.Instance.UdpClient;
+        }
+        else
+        {
+            client = NetproNetworkManager.Instance.TcpClient;
+        }
+
+        var data = client.GetReceivedData();
 
         if (data == null)
         {
@@ -209,4 +244,13 @@ public class GameManager : MonoBehaviour
 
         return JsonUtility.FromJson<Vector3>(data);
     }
+
+    private void OnConnectFailed()
+    {
+        Debug.LogWarning("通信が断絶されました。");
+        NetproNetworkManager.Instance.TcpClient.EndClient();
+        NetproNetworkManager.Instance.UdpClient.EndClient();
+        Application.Quit();
+    }
 }
+

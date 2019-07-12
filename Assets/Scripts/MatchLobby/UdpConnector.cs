@@ -47,7 +47,7 @@ public class UdpConnector : MonoBehaviour
         var ipAddr = IPAddress.Parse(addr);
 
         // UDPラッパーの作成
-        m_Client = new NetproUdpClient(ipAddr, 2059);
+        m_Client = new NetproUdpClient(ipAddr, 2059, 0);
 
         Debug.Log("Send UDP... to " + ipAddr);
         StartCoroutine(SendHello(10, new IPEndPoint(ipAddr, 2059)));

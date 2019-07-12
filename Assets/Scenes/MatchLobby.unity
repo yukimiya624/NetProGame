@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 170076734}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2071,6 +2071,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RemoteServerUrl: http://gamugames.cipher.jp/cgi-bin/server.cgi/match
   m_P2Pport: 2059
+  m_MasterUdpPort: 2060
+  m_NonMasterUdpPort: 2061
 --- !u!4 &749873019
 Transform:
   m_ObjectHideFlags: 0
@@ -2101,8 +2103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SelfObj: {fileID: 941028312}
   m_OpponentObj: {fileID: 1558722675}
-  m_IsTransition: 0
-  m_State: 0
+  m_SendProtocol: 0
 --- !u!1 &807980511
 GameObject:
   m_ObjectHideFlags: 0
@@ -2836,7 +2837,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 40556fc7f61f1a5499bb5da170209fe9, type: 2}
+  - {fileID: 2100000, guid: 2d5bfe0acfb614741afa6150b3ecc2ab, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3809,7 +3810,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 57dc38551bb926f458147b1c3f0afdd8, type: 2}
+  - {fileID: 2100000, guid: e57d633df79ab79428791e5d8fab8e51, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -53,20 +53,38 @@ public class NetproTcpClient : NetproClientBase
 
         if (m_StreamReader != null)
         {
-            m_StreamReader.Close();
-            m_StreamReader = null;
+            try
+            {
+                m_StreamReader.Close();
+            }
+            finally
+            {
+                m_StreamReader = null;
+            }
         }
 
         if (m_StreamWriter != null)
         {
-            m_StreamWriter.Close();
-            m_StreamWriter = null;
+            try
+            {
+                m_StreamWriter.Close();
+            }
+            finally
+            {
+                m_StreamWriter = null;
+            }
         }
 
         if (TcpClient != null)
         {
-            TcpClient.Close();
-            TcpClient = null;
+            try
+            {
+                TcpClient.Close();
+            }
+            finally
+            {
+                TcpClient = null;
+            }
         }
     }
 

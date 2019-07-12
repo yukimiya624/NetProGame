@@ -29,6 +29,12 @@ public class NetproNetworkManager : MonoBehaviour
     [SerializeField]
     private int m_P2Pport;
 
+    [SerializeField]
+    private int m_MasterUdpPort;
+
+    [SerializeField]
+    private int m_NonMasterUdpPort;
+
 #pragma warning restore 649
     #endregion
 
@@ -249,7 +255,7 @@ public class NetproNetworkManager : MonoBehaviour
     /// <summary>
     /// より扱いやすいNetproUdpクライアントを作成する。
     /// </summary>
-    private void CreateNetproUdpClient()
+    private void CreateNetproUdpClient(bool isMasterClient)
     {
         if (OpponentIpAddress == null)
         {
@@ -257,7 +263,14 @@ public class NetproNetworkManager : MonoBehaviour
             return;
         }
 
-        UdpClient = new NetproUdpClient(OpponentIpAddress, m_P2Pport);
+        if (isMasterClient)
+        {
+            UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_NonMasterUdpPort);
+        }
+        else
+        {
+            UdpClient = new NetproUdpClient(OpponentIpAddress, m_NonMasterUdpPort, m_MasterUdpPort);
+        }
         UdpClient.StartReceive();
     }
 
@@ -404,6 +417,7 @@ public class NetproNetworkManager : MonoBehaviour
         var tcpClient = listener.EndAcceptTcpClient(result);
         listener.Stop();
 
+
         // 接続してきた相手のアドレスを取得する
         var ep = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
         OpponentIpAddress = ep.Address;
@@ -411,8 +425,8 @@ public class NetproNetworkManager : MonoBehaviour
         IsMasterClient = true;
 
         // クライアント間の接続開始
-        CreateNetproUdpClient();
         CreateNetproTcpClient(tcpClient);
+        CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
     }
 
@@ -429,8 +443,8 @@ public class NetproNetworkManager : MonoBehaviour
         IsMasterClient = false;
 
         // クライアント間の接続開始
-        CreateNetproUdpClient();
         CreateNetproTcpClient(tcpClient);
+        CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
     }
 

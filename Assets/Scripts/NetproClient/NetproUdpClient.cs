@@ -29,13 +29,14 @@ public class NetproUdpClient : NetproClientBase
     /// コンストラクタ。
     /// </summary>
     /// <param name="opponentAddress">通信相手のIPv4アドレス</param>
-    /// <param name="port">ポート</param>
-    public NetproUdpClient(IPAddress opponentAddress, int port)
+    /// <param name="selfPort">自身の待ち受けポート</param>
+    /// <param name="opponentPort">相手の待ち受けポート</param>
+    public NetproUdpClient(IPAddress opponentAddress, int selfPort, int opponentPort)
     {
         // UdpClientのコンストラクタで「自身の待ち受けポート」を指定する
         // これを指定しないとReceiveでちゃんと受信してくれない
-        UdpClient = new UdpClient(port);
-        m_OpponentEndPoint = new IPEndPoint(opponentAddress, port);
+        UdpClient = new UdpClient(selfPort);
+        m_OpponentEndPoint = new IPEndPoint(opponentAddress, opponentPort);
     }
 
     /// <summary>
@@ -45,12 +46,18 @@ public class NetproUdpClient : NetproClientBase
     {
         base.EndClient();
 
-        Debug.LogError("NetproUdpClient : EndClient");
+        Debug.Log("NetproUdpClient : EndClient");
 
         if (UdpClient != null)
         {
-            UdpClient.Close();
-            UdpClient = null;
+            try
+            {
+                UdpClient.Close();
+            }
+            finally
+            {
+                UdpClient = null;
+            }
         }
     }
 
