@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 /// </summary>
 public class NetproNetworkManager : MonoBehaviour
 {
+
     #region Field Inspector
 #pragma warning disable 649
 
@@ -263,32 +264,72 @@ public class NetproNetworkManager : MonoBehaviour
             return;
         }
 
-        if (isMasterClient)
+        if (!SelfIpAddress.Equals(OpponentIpAddress))
         {
-            UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_NonMasterUdpPort);
+            // アドレスが違う場合は、同じポートを使っても大丈夫
+            UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_MasterUdpPort);
         }
         else
         {
-            UdpClient = new NetproUdpClient(OpponentIpAddress, m_NonMasterUdpPort, m_MasterUdpPort);
+            // アドレスが同じ場合(つまり同じ端末の場合)は、異なるポートを使ってUDP通信する
+            if (isMasterClient)
+            {
+                UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_NonMasterUdpPort);
+            }
+            else
+            {
+                UdpClient = new NetproUdpClient(OpponentIpAddress, m_NonMasterUdpPort, m_MasterUdpPort);
+            }
         }
+
         UdpClient.StartReceive();
+    }
+
+    /// <summary>
+    /// UDPやTCPの通信で受信に失敗していないかどうかを判定する。
+    /// </summary>
+    public bool IsReceiveFailed(E_PROTOCOL_TYPE flag)
+    {
+        bool isFailed = false;
+        if ((flag & E_PROTOCOL_TYPE.TCP) == E_PROTOCOL_TYPE.TCP && TcpClient != null)
+        {
+            isFailed |= TcpClient.IsReceiveFailed;
+        }
+        if ((flag & E_PROTOCOL_TYPE.UDP) == E_PROTOCOL_TYPE.UDP && UdpClient != null)
+        {
+            isFailed |= UdpClient.IsReceiveFailed;
+        }
+
+        return isFailed;
     }
 
     /// <summary>
     /// クライアントインスタンスを閉じる。
     /// </summary>
-    private void CloseClients()
+    public void CloseClients()
     {
         if (TcpClient != null)
         {
-            TcpClient.EndClient();
-            TcpClient = null;
+            try
+            {
+                TcpClient.EndClient();
+            }
+            finally
+            {
+                TcpClient = null;
+            }
         }
 
         if (UdpClient != null)
         {
-            UdpClient.EndClient();
-            UdpClient = null;
+            try
+            {
+                UdpClient.EndClient();
+            }
+            finally
+            {
+                UdpClient = null;
+            }
         }
     }
 

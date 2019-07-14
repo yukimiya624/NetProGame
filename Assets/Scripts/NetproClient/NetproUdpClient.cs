@@ -117,15 +117,13 @@ public class NetproUdpClient : NetproClientBase
             }
             catch (ObjectDisposedException ode)
             {
-                Debug.LogError("ソケットが閉じられました。");
-                Debug.LogException(ode);
-                EventUtility.SafeInvokeAction(OnReceiveFailed);
+                m_ErrorQueue.Enqueue(new ErrorData("ソケットが閉じられました。", ode));
+                IsReceiveFailed = true;
             }
             catch (SocketException se)
             {
-                Debug.LogError("エラーが発生しました。");
-                Debug.LogException(se);
-                EventUtility.SafeInvokeAction(OnReceiveFailed);
+                m_ErrorQueue.Enqueue(new ErrorData("エラーが発生しました。", se));
+                IsReceiveFailed = true;
             }
         }
     }

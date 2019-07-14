@@ -2071,8 +2071,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RemoteServerUrl: http://gamugames.cipher.jp/cgi-bin/server.cgi/match
   m_P2Pport: 2059
-  m_MasterUdpPort: 2060
-  m_NonMasterUdpPort: 2061
+  m_MasterUdpPort: 2059
+  m_NonMasterUdpPort: 2060
 --- !u!4 &749873019
 Transform:
   m_ObjectHideFlags: 0
@@ -2103,7 +2103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SelfObj: {fileID: 941028312}
   m_OpponentObj: {fileID: 1558722675}
-  m_SendProtocol: 0
+  m_SendProtocolType: 1
 --- !u!1 &807980511
 GameObject:
   m_ObjectHideFlags: 0

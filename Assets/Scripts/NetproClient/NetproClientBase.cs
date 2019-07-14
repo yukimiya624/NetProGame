@@ -14,6 +14,18 @@ using System.Text.RegularExpressions;
 /// </summary>
 public abstract class NetproClientBase
 {
+    public struct ErrorData
+    {
+        public string Msg;
+        public Exception Excp;
+
+        public ErrorData(string msg, Exception e)
+        {
+            Msg = msg;
+            Excp = e;
+        }
+    }
+
     /// <summary>
     /// 通信のデータの区切りに用いる記号列。
     /// </summary>
@@ -44,6 +56,11 @@ public abstract class NetproClientBase
     protected Queue<string> m_ReceiveQueue = new Queue<string>();
 
     /// <summary>
+    /// エラーデータのキュー。
+    /// </summary>
+    protected Queue<ErrorData> m_ErrorQueue = new Queue<ErrorData>();
+
+    /// <summary>
     /// データ同期のために用いるオブジェクト。
     /// </summary>
     protected object m_SyncObject = new object();
@@ -64,9 +81,9 @@ public abstract class NetproClientBase
     public Action OnReceive { get; set; }
 
     /// <summary>
-    /// 受信に失敗した時に自動的に呼び出されるコールバック。
+    /// 受信に失敗したかどうか。
     /// </summary>
-    public Action OnReceiveFailed { get; set; }
+    public bool IsReceiveFailed { get; protected set; }
 
 
 
@@ -103,8 +120,14 @@ public abstract class NetproClientBase
     {
         if (m_ReceiveThread != null)
         {
-            m_ReceiveThread.Abort();
-            m_ReceiveThread = null;
+            try
+            {
+                m_ReceiveThread.Abort();
+            }
+            finally
+            {
+                m_ReceiveThread = null;
+            }
         }
 
         if (m_StringBuilder != null)
@@ -116,11 +139,6 @@ public abstract class NetproClientBase
         if (OnReceive != null)
         {
             OnReceive = null;
-        }
-
-        if (OnReceiveFailed != null)
-        {
-            OnReceiveFailed = null;
         }
     }
 
