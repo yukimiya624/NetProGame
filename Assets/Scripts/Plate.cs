@@ -10,9 +10,8 @@ public class Plate : MonoBehaviour
     //スクリーン座標をワールド座標に変換した位置座標
     private Vector3 screenToWorldPointPosition;
 
-    [SerializeField]
-
     //開始時の座標
+    [SerializeField]
     private Vector3 startPosition;
 
     [SerializeField]
@@ -20,11 +19,16 @@ public class Plate : MonoBehaviour
 
     void Start()
     {
-        startPosition = new Vector3(rb.position.x, rb.position.y, rb.position.z);
+        startPosition = new Vector3(0, 2, 0);
+        transform.position = startPosition;
 
-        Vector3 force = new Vector3(Random.Range(-100.0f,100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
+        if (NetproNetworkManager.Instance.IsMasterClient) {
+            Vector3 force = new Vector3(Random.Range(-100.0f, 100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
+            rb.AddForce(force, ForceMode.Impulse);
 
-        rb.AddForce(force, ForceMode.Impulse);
+            var sendData = new SyncPlateData(3, rb.position, rb.velocity);
+            NetproNetworkManager.Instance.SendUdp(sendData, null);
+        }
     }
 
     //ゴールラインに触れると3.5秒後にゴールを決められた方のフィールドにプレートが現れる。
@@ -54,7 +58,6 @@ public class Plate : MonoBehaviour
         {
             var sendData = new SyncPlateData(3,rb.position,rb.velocity);
             NetproNetworkManager.Instance.SendUdp(sendData, null);
-
         }
     }
 

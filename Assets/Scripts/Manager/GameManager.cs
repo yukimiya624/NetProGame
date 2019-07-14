@@ -162,9 +162,9 @@ public class GameManager : MonoBehaviour
         {
             m_State = E_State.BATTLE;
 
-            m_Plate = Instantiate(m_PlatePrefab);
+            SceneManager.LoadScene("Battle");
 
-            SceneManager.LoadScene("PreBattle");
+            m_Plate = Instantiate(m_PlatePrefab);
         }
     }
 
