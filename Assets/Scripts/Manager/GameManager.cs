@@ -41,6 +41,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private E_PROTOCOL_TYPE m_SendProtocolType;
 
+    [SerializeField]
+    private Plate m_PlatePrefab;
+
 #pragma warning restore 649
     #endregion
 
@@ -58,6 +61,8 @@ public class GameManager : MonoBehaviour
     /// これの使い方が適当なので注意。
     /// </summary>
     private bool m_IsTransition;
+
+    private Plate m_Plate; 
 
     #endregion
 
@@ -157,6 +162,8 @@ public class GameManager : MonoBehaviour
         {
             m_State = E_State.BATTLE;
 
+            m_Plate = Instantiate(m_PlatePrefab);
+
             // Build Settings の2つ目に登録されているシーン(PreBattle)に遷移する
             // Build Settings の登録順序によって変動するので注意
             SceneManager.LoadScene(1);
@@ -174,29 +181,46 @@ public class GameManager : MonoBehaviour
             m_State = E_State.BATTLE_DISCONNECTED;
         }
 
-        if (m_SelfObj)
+        //if (m_SelfObj)
+        //{
+        //    //var platePos = new 
+
+        //    var pos = m_SelfObj.transform.position;
+        //    pos += new Vector3(x, y, 0);
+        //    m_SelfObj.transform.position = pos;
+
+        //    // 座標を送信する
+        //    SendPosition(pos);
+        //}
+
+        //if (m_OpponentObj)
+        //{
+        //    // 座標を受信する
+        //    var pos = ReceivePosition();
+        //    if (pos == null)
+        //    {
+        //        return;
+        //    }
+
+        //    m_OpponentObj.transform.position = (Vector3)pos;
+        //}
+
+        while (NetproNetworkManager.Instance.UdpClient.IsRemainReceivedData())
         {
-            var x = Input.GetAxis("Horizontal");
-            var y = Input.GetAxis("Vertical");
+            var receivedData = NetproNetworkManager.Instance.ReceiveUdp();
 
-            var pos = m_SelfObj.transform.position;
-            pos += new Vector3(x, y, 0);
-            m_SelfObj.transform.position = pos;
-
-            // 座標を送信する
-            SendPosition(pos);
-        }
-
-        if (m_OpponentObj)
-        {
-            // 座標を受信する
-            var pos = ReceivePosition();
-            if (pos == null)
+            if (receivedData == null)
             {
-                return;
+                continue;
             }
 
-            m_OpponentObj.transform.position = (Vector3)pos;
+            if (receivedData is SyncPlateData plateData)
+            {
+                if (m_Plate != null )
+                {
+                    m_Plate.ApplyPositionAndVelocity(plateData);
+                }
+            }
         }
     }
 

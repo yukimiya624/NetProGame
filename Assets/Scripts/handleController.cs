@@ -31,6 +31,7 @@ public class handleController : MonoBehaviour
     void Update()
     {
         this.SetDestination(Input.mousePosition);
+        var sendData = new SyncHandleData(0, rb.position);
     }
 
     void SetDestination(Vector3 screenPoint)
