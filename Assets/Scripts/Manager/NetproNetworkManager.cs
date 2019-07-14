@@ -84,13 +84,13 @@ public class NetproNetworkManager : MonoBehaviour
     /// 対戦相手との通信に用いるTcpクライアント。
     /// 確実に通信したい場合に用いる。
     /// </summary>
-    public NetproTcpClient TcpClient { get; private set; }
+    private NetproTcpClient TcpClient { get; set; }
 
     /// <summary>
     /// 対戦相手との通信に用いるUdpクライアント。
     /// リアルタイム通信したい場合に用いる。
     /// </summary>
-    public NetproUdpClient UdpClient { get; private set; }
+    private NetproUdpClient UdpClient { get; set; }
 
     #endregion
 
@@ -196,6 +196,8 @@ public class NetproNetworkManager : MonoBehaviour
     #endregion
 
 
+
+    #region Connect
 
     /// <summary>
     /// 自身のPCのIPv4アドレスを全て取得する。
@@ -332,6 +334,113 @@ public class NetproNetworkManager : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+
+
+    #region Send Receive
+
+    /// <summary>
+    /// 構造体データをJSONに変換する
+    /// </summary>
+    private string ToJson<T>(T data) where T : struct
+    {
+        var typeData = new TypeData();
+        typeData.Type = data.GetType().FullName;
+        typeData.Content = JsonUtility.ToJson(data);
+        return JsonUtility.ToJson(typeData);
+    }
+
+    /// <summary>
+    /// JSONから構造体インスタンスに変換する
+    /// </summary>
+    /// <param name="data">タイプデータJSON</param>
+    private object FromJson(string data)
+    {
+        var typeData = JsonUtility.FromJson<TypeData>(data);
+        Type t = Type.GetType(typeData.Type);
+        return JsonUtility.FromJson(typeData.Content, t);
+    }
+
+    /// <summary>
+    /// TCPで構造体データを送信する
+    /// </summary>
+    /// <param name="data">送信する構造体</param>
+    /// <param name="onFailedCallback">失敗時コールバック</param>
+    public void SendTcp<T>(T data, Action onFailedCallback = null) where T : struct
+    {
+        if (TcpClient == null)
+        {
+            Debug.LogError("Send TCP Error : TcpClientがnullです。");
+            EventUtility.SafeInvokeAction(onFailedCallback);
+            return;
+        }
+
+        var sendData = ToJson(data);
+        TcpClient.SendData(sendData, onFailedCallback);
+    }
+
+    /// <summary>
+    /// TCPで受信したデータを取得する
+    /// </summary>
+    public object ReceiveTcp()
+    {
+        if (TcpClient == null)
+        {
+            Debug.LogError("Receive TCP Error : TcpClientがnullです。");
+            return null;
+        }
+
+        if (!TcpClient.IsRemainReceivedData())
+        {
+            return null;
+        }
+
+        var receivedData = TcpClient.GetReceivedData();
+        return FromJson(receivedData);
+    }
+
+    /// <summary>
+    /// UDPで構造体データを送信する
+    /// </summary>
+    /// <param name="data">送信する構造体</param>
+    /// <param name="onFailedCallback">失敗時コールバック</param>
+    public void SendUdp<T>(T data, Action onFailedCallback = null) where T : struct
+    {
+        if (UdpClient == null)
+        {
+            Debug.LogError("Send UDP Error : UdpClientがnullです。");
+            EventUtility.SafeInvokeAction(onFailedCallback);
+            return;
+        }
+
+        var sendData = ToJson(data);
+        UdpClient.SendData(sendData, onFailedCallback);
+    }
+
+    /// <summary>
+    /// UDPで受信したデータを取得する
+    /// </summary>
+    public object ReceiveUdp()
+    {
+        if (UdpClient == null)
+        {
+            Debug.LogError("Receive UDP Error : UdpClientがnullです。");
+            return null;
+        }
+
+        if (!UdpClient.IsRemainReceivedData())
+        {
+            return null;
+        }
+
+        var receivedData = UdpClient.GetReceivedData();
+        return FromJson(receivedData);
+    }
+
+    #endregion
+
 
 
     #region Match
