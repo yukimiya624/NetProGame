@@ -205,23 +205,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void SendPosition(Vector3 pos)
     {
-        var data = JsonUtility.ToJson(pos);
-
-        NetproClientBase client = null;
-        if (m_SendProtocolType == E_PROTOCOL_TYPE.UDP)
-        {
-            client = NetproNetworkManager.Instance.UdpClient;
-        } else
-        {
-            client = NetproNetworkManager.Instance.TcpClient;
-        }
-
-        if (client == null)
-        {
-            return;
-        }
-
-        client.SendData(data, OnConnectFailed);
+        var data = new NetproVector3();
+        data.SetVector3(pos);
+        NetproNetworkManager.Instance.SendUdp(data, null);
     }
 
     /// <summary>
@@ -229,29 +215,19 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private Vector3? ReceivePosition()
     {
-        NetproClientBase client = null;
-        if (m_SendProtocolType == E_PROTOCOL_TYPE.UDP)
-        {
-            client = NetproNetworkManager.Instance.UdpClient;
-        }
-        else
-        {
-            client = NetproNetworkManager.Instance.TcpClient;
-        }
-
-        if (client == null)
-        {
-            return null;
-        }
-
-        var data = client.GetReceivedData();
+        var data = NetproNetworkManager.Instance.ReceiveUdp();
 
         if (data == null)
         {
             return null;
         }
 
-        return JsonUtility.FromJson<Vector3>(data);
+        if (data is NetproVector3 pos)
+        {
+            return pos.GetVector3();
+        }
+
+        return null;
     }
 
     private void OnConnectFailed()

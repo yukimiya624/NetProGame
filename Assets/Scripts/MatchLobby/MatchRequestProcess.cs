@@ -9,11 +9,15 @@ using UnityEngine.UI;
 /// </summary>
 public class MatchRequestProcess : MonoBehaviour
 {
+#pragma warning disable 649
+
     [SerializeField]
     private Dropdown m_AddressDropdown;
 
     [SerializeField]
     private Button m_RequestMatchButton;
+
+#pragma warning restore 649
 
     private void Start()
     {
