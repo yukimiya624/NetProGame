@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 /// </summary>
 public class NetproNetworkManager : MonoBehaviour
 {
+
     #region Field Inspector
 #pragma warning disable 649
 
@@ -28,6 +29,12 @@ public class NetproNetworkManager : MonoBehaviour
     /// </summary>
     [SerializeField]
     private int m_P2Pport;
+
+    [SerializeField]
+    private int m_MasterUdpPort;
+
+    [SerializeField]
+    private int m_NonMasterUdpPort;
 
 #pragma warning restore 649
     #endregion
@@ -249,7 +256,7 @@ public class NetproNetworkManager : MonoBehaviour
     /// <summary>
     /// より扱いやすいNetproUdpクライアントを作成する。
     /// </summary>
-    private void CreateNetproUdpClient()
+    private void CreateNetproUdpClient(bool isMasterClient)
     {
         if (OpponentIpAddress == null)
         {
@@ -257,25 +264,72 @@ public class NetproNetworkManager : MonoBehaviour
             return;
         }
 
-        UdpClient = new NetproUdpClient(OpponentIpAddress, m_P2Pport);
+        if (!SelfIpAddress.Equals(OpponentIpAddress))
+        {
+            // アドレスが違う場合は、同じポートを使っても大丈夫
+            UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_MasterUdpPort);
+        }
+        else
+        {
+            // アドレスが同じ場合(つまり同じ端末の場合)は、異なるポートを使ってUDP通信する
+            if (isMasterClient)
+            {
+                UdpClient = new NetproUdpClient(OpponentIpAddress, m_MasterUdpPort, m_NonMasterUdpPort);
+            }
+            else
+            {
+                UdpClient = new NetproUdpClient(OpponentIpAddress, m_NonMasterUdpPort, m_MasterUdpPort);
+            }
+        }
+
         UdpClient.StartReceive();
+    }
+
+    /// <summary>
+    /// UDPやTCPの通信で受信に失敗していないかどうかを判定する。
+    /// </summary>
+    public bool IsReceiveFailed(E_PROTOCOL_TYPE flag)
+    {
+        bool isFailed = false;
+        if ((flag & E_PROTOCOL_TYPE.TCP) == E_PROTOCOL_TYPE.TCP && TcpClient != null)
+        {
+            isFailed |= TcpClient.IsReceiveFailed;
+        }
+        if ((flag & E_PROTOCOL_TYPE.UDP) == E_PROTOCOL_TYPE.UDP && UdpClient != null)
+        {
+            isFailed |= UdpClient.IsReceiveFailed;
+        }
+
+        return isFailed;
     }
 
     /// <summary>
     /// クライアントインスタンスを閉じる。
     /// </summary>
-    private void CloseClients()
+    public void CloseClients()
     {
         if (TcpClient != null)
         {
-            TcpClient.EndClient();
-            TcpClient = null;
+            try
+            {
+                TcpClient.EndClient();
+            }
+            finally
+            {
+                TcpClient = null;
+            }
         }
 
         if (UdpClient != null)
         {
-            UdpClient.EndClient();
-            UdpClient = null;
+            try
+            {
+                UdpClient.EndClient();
+            }
+            finally
+            {
+                UdpClient = null;
+            }
         }
     }
 
@@ -404,6 +458,7 @@ public class NetproNetworkManager : MonoBehaviour
         var tcpClient = listener.EndAcceptTcpClient(result);
         listener.Stop();
 
+
         // 接続してきた相手のアドレスを取得する
         var ep = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
         OpponentIpAddress = ep.Address;
@@ -411,8 +466,8 @@ public class NetproNetworkManager : MonoBehaviour
         IsMasterClient = true;
 
         // クライアント間の接続開始
-        CreateNetproUdpClient();
         CreateNetproTcpClient(tcpClient);
+        CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
     }
 
@@ -429,8 +484,8 @@ public class NetproNetworkManager : MonoBehaviour
         IsMasterClient = false;
 
         // クライアント間の接続開始
-        CreateNetproUdpClient();
         CreateNetproTcpClient(tcpClient);
+        CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
     }
 
