@@ -156,10 +156,7 @@ public class GameManager : MonoBehaviour
         if (m_IsTransition)
         {
             m_State = E_State.BATTLE;
-
-            // Build Settings の2つ目に登録されているシーン(PreBattle)に遷移する
-            // Build Settings の登録順序によって変動するので注意
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene("PreBattle");
         }
     }
 
