@@ -164,9 +164,7 @@ public class GameManager : MonoBehaviour
 
             m_Plate = Instantiate(m_PlatePrefab);
 
-            // Build Settings の2つ目に登録されているシーン(PreBattle)に遷移する
-            // Build Settings の登録順序によって変動するので注意
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene("PreBattle");
         }
     }
 
