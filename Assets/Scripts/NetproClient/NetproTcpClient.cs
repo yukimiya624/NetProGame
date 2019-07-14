@@ -53,20 +53,38 @@ public class NetproTcpClient : NetproClientBase
 
         if (m_StreamReader != null)
         {
-            m_StreamReader.Close();
-            m_StreamReader = null;
+            try
+            {
+                m_StreamReader.Close();
+            }
+            finally
+            {
+                m_StreamReader = null;
+            }
         }
 
         if (m_StreamWriter != null)
         {
-            m_StreamWriter.Close();
-            m_StreamWriter = null;
+            try
+            {
+                m_StreamWriter.Close();
+            }
+            finally
+            {
+                m_StreamWriter = null;
+            }
         }
 
         if (TcpClient != null)
         {
-            TcpClient.Close();
-            TcpClient = null;
+            try
+            {
+                TcpClient.Close();
+            }
+            finally
+            {
+                TcpClient = null;
+            }
         }
     }
 
@@ -127,15 +145,13 @@ public class NetproTcpClient : NetproClientBase
             }
             catch (ObjectDisposedException ode)
             {
-                Debug.LogError("ソケットが閉じられました。");
-                Debug.LogException(ode);
-                EventUtility.SafeInvokeAction(OnReceiveFailed);
+                m_ErrorQueue.Enqueue(new ErrorData("ソケットが閉じられました。", ode));
+                IsReceiveFailed = true;
             }
             catch (SocketException se)
             {
-                Debug.LogError("エラーが発生しました。");
-                Debug.LogException(se);
-                EventUtility.SafeInvokeAction(OnReceiveFailed);
+                m_ErrorQueue.Enqueue(new ErrorData("エラーが発生しました。", se));
+                IsReceiveFailed = true;
             }
         }
     }
