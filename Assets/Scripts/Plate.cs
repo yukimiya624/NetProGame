@@ -19,15 +19,15 @@ public class Plate : MonoBehaviour
 
     void Start()
     {
-        startPosition = new Vector3(0, 2, 0);
+        startPosition = new Vector3(0, -6, 0);
         transform.position = startPosition;
 
         if (NetproNetworkManager.Instance.IsMasterClient) {
             Vector3 force = new Vector3(Random.Range(-100.0f, 100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
             rb.AddForce(force, ForceMode.Impulse);
 
-            var sendData = new SyncPlateData(3, rb.position, rb.velocity);
-            NetproNetworkManager.Instance.SendUdp(sendData, null);
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
         }
     }
 
@@ -54,12 +54,20 @@ public class Plate : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "handle")
+        if (collision.gameObject.transform.parent.name == "SelfHandle(Clone)")
         {
-            var sendData = new SyncPlateData(3,rb.position,rb.velocity);
-            NetproNetworkManager.Instance.SendUdp(sendData, null);
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
+
+        if (collision.gameObject.transform.parent.name == "OpponentHandle(Clone)")
+        {
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
         }
     }
+
+
 
     public void ApplyPositionAndVelocity(SyncPlateData data)
     {
@@ -71,5 +79,10 @@ public class Plate : MonoBehaviour
     {
         yield return new WaitForSeconds(waittime);
         action();
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("削除されました");
     }
 }

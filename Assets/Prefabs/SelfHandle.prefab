@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 7422133222478620682}
   - component: {fileID: 416528687}
   - component: {fileID: 416528686}
-  - component: {fileID: 416528683}
   m_Layer: 2
   m_Name: handle
   m_TagString: Untagged
@@ -30,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 416528681}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 800, y: 800, z: 1000}
+  m_LocalScale: {x: 1000, y: 1300, z: 1000}
   m_Children: []
   m_Father: {fileID: 1783439110}
   m_RootOrder: 0
@@ -90,7 +89,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 3.57
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
@@ -109,24 +108,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.0198724, y: 0.019872406, z: 0.014619693}
   m_Center: {x: 0, y: 4.656614e-10, z: 0.0073098466}
---- !u!114 &416528683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 416528681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af637b2d0f554214ab115799ff140f4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MaxSpeed: 10
-  MovableRangeX: {x: -Infinity, y: Infinity}
-  MovableRangeZ: {x: -Infinity, y: Infinity}
-  SpringStiffness: 1000
-  VelocityDamper: 100
-  DestinationDamper: 10
 --- !u!1 &4747412663091674702
 GameObject:
   m_ObjectHideFlags: 0
@@ -136,8 +117,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1783439110}
+  - component: {fileID: 4576087891883698106}
   m_Layer: 2
-  m_Name: handle
+  m_Name: SelfHandle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -158,3 +140,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4576087891883698106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4747412663091674702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af637b2d0f554214ab115799ff140f4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxSpeed: 10
+  MovableRangeX: {x: -Infinity, y: Infinity}
+  MovableRangeZ: {x: -Infinity, y: Infinity}
+  SpringStiffness: 1000
+  VelocityDamper: 100
+  DestinationDamper: 10
+  rb: {fileID: 416528687}
