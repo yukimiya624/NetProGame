@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// クライアント通信の低レイヤーをサポートするマネージャ。
 /// Created by Sho Yamagami.
 /// </summary>
-public class NetproNetworkManager : MonoBehaviour
+public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
 {
 
     #region Field Inspector
@@ -60,12 +60,6 @@ public class NetproNetworkManager : MonoBehaviour
     #region Property
 
     /// <summary>
-    /// 自身のインスタンス。
-    /// シングルトンパターンのために使用。
-    /// </summary>
-    public static NetproNetworkManager Instance { get; private set; }
-
-    /// <summary>
     /// 自分がマスタークライアントかどうか。
     /// </summary>
     public bool IsMasterClient { get; private set; }
@@ -98,57 +92,66 @@ public class NetproNetworkManager : MonoBehaviour
 
     #region Unity Callback
 
-    /// <summary>
-    /// このインスタンスの生成時の処理。
-    /// </summary>
-    private void Awake()
+    protected override void OnAwake()
     {
-        if (Instance)
-        {
-            Debug.LogWarning("NetworkManager is duplicate.");
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
+        base.OnAwake();
     }
 
     /// <summary>
     /// このインスタンスの破棄時の処理。
     /// </summary>
-    private void OnDestroy()
+    protected override void OnDestroyed()
     {
         CloseClients();
-        Instance = null;
+        base.OnDestroyed();
+    }
+
+    /// <summary>
+    /// 初期化処理。
+    /// </summary>
+    public override void OnInitialize()
+    {
+        base.OnInitialize();
+    }
+
+    /// <summary>
+    /// 終了処理。
+    /// </summary>
+    public override void OnFinalize()
+    {
+        base.OnFinalize();
     }
 
     /// <summary>
     /// このインスタンスが生成されてから最初のフレームで呼び出される。
     /// </summary>
-    private void Start()
+    public override void OnStart()
     {
+        base.OnStart();
     }
 
     /// <summary>
     /// 毎フレーム呼び出される。
     /// </summary>
-    private void Update()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
     }
 
     /// <summary>
     /// 全てのUpdate()関数が呼び出された後に毎フレーム呼び出される。
     /// </summary>
-    private void LateUpdate()
+    public override void OnLateUpdate()
     {
+        base.OnLateUpdate();
     }
 
     /// <summary>
     /// 固定間隔で呼び出される。
     /// </summary>
-    private void FixedUpdate()
+    public override void OnFixedUpdate()
     {
+        base.OnFixedUpdate();
     }
 
     /// <summary>
