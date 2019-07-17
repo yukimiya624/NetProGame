@@ -124,9 +124,9 @@ GameObject:
   - component: {fileID: 19352972}
   - component: {fileID: 19352971}
   - component: {fileID: 19352970}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: ownGoal
-  m_TagString: Untagged
+  m_TagString: OwnGoal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1795,14 +1795,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: sikiri
       objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 8.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1858,6 +1850,14 @@ PrefabInstance:
     - target: {fileID: 400004, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_LocalScale.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_Enabled
@@ -2143,9 +2143,9 @@ GameObject:
   - component: {fileID: 2084687027}
   - component: {fileID: 2084687026}
   - component: {fileID: 2084687025}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: enemyGoal
-  m_TagString: Untagged
+  m_TagString: Goal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
