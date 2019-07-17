@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+//[RequireComponent(typeof(Rigidbody))]
 
-public class handleController : MonoBehaviour
+public class SelfHandleController : MonoBehaviour
 {
     //public GameObject ground;
 
@@ -17,20 +17,37 @@ public class handleController : MonoBehaviour
     [Range(0.0f, 10000.0f)] public float DestinationDamper = 10.0f;
 
     private Vector3 destination;
-    private new Rigidbody rb;
+
+    [SerializeField]
+    Rigidbody rb = new Rigidbody();
 
     // Start is called before the first frame update
     void Start()
     {
-        this.rb = this.GetComponent<Rigidbody>();
-        this.rb.isKinematic = false;
-        this.destination = this.rb.position;
+        var startPosition = new Vector3(0,0,-100);
+        rb.position = startPosition;
+        //this.SetDestination(new Vector3(0,0,40));
+        rb.isKinematic = false;
+        //destination = rb.position;
     }
 
     // Update is called once per frame
     void Update()
     {
         this.SetDestination(Input.mousePosition);
+        var posData = new Vector3(-rb.position.x, rb.position.y, -rb.position.z);
+
+        if (NetproNetworkManager.Instance.IsMasterClient)
+        {
+            var sendData = new SyncHandleData(1, posData);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
+        else
+        {
+            var sendData = new SyncHandleData(0, posData);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
+
     }
 
     void SetDestination(Vector3 screenPoint)
@@ -62,16 +79,17 @@ public class handleController : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         // ハンドルを目標地点(マウス位置)に引きつける力をかける
-        this.rb.AddForce(this.GetSpringForce());
+        rb.AddForce(this.GetSpringForce());
     }
 
     private Vector3 GetSpringForce()
     {
-        var velocity = this.rb.velocity; //速度
+        var velocity = rb.velocity; //速度
         var speed = velocity.magnitude; //速さ
         var velocityDirection = speed < 1E-5f ? Vector3.zero : velocity / speed;
-        var relativePosition = this.destination - this.rb.position;
+        var relativePosition = this.destination - rb.position;
         var sqrDistance = relativePosition.sqrMagnitude;
 
         //目標地点との距離に比例する復元力
@@ -84,12 +102,20 @@ public class handleController : MonoBehaviour
         var destinationDamperForceMagnitude = this.DestinationDamper / sqrDistance;
 
         //ハンドルの運動量の大きさ * 秒間フレーム数
-        var momentumThreshold = (speed * this.rb.mass) / Time.fixedDeltaTime;
+        var momentumThreshold = (speed * rb.mass) / Time.fixedDeltaTime;
 
         var damperForceMagnitude = Mathf.Min(velocityDamperForceMagnitude + destinationDamperForceMagnitude, momentumThreshold);
 
         var force = springForce - (damperForceMagnitude * velocityDirection); ;
         return force;
+    }
+
+    public void ApplyPosition(SyncHandleData data)
+    {
+        if (data.id == data.id2 && data.pos.Equals(data.pos2))
+        {
+            rb.transform.position = data.pos;
+        }
     }
 
 }

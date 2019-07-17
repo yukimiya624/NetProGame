@@ -10,18 +10,25 @@ public class Plate : MonoBehaviour
     //スクリーン座標をワールド座標に変換した位置座標
     private Vector3 screenToWorldPointPosition;
 
-    [SerializeField]
-
     //開始時の座標
+    [SerializeField]
     private Vector3 startPosition;
 
-    Rigidbody rb;
+    [SerializeField]
+    Rigidbody rb = new Rigidbody();
+
     void Start()
     {
-        rb = this.GetComponent<Rigidbody>();
-        startPosition = new Vector3(rb.position.x, rb.position.y, rb.position.z);
-        Vector3 force = new Vector3(Random.Range(-100.0f,100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
-        rb.AddForce(force, ForceMode.Impulse);
+        startPosition = new Vector3(0, -6, 0);
+        transform.position = startPosition;
+
+        if (NetproNetworkManager.Instance.IsMasterClient) {
+            Vector3 force = new Vector3(Random.Range(-100.0f, 100.0f), 0.0f, Random.Range(-100.0f, 100.0f));
+            rb.AddForce(force, ForceMode.Impulse);
+
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
     }
 
     //ゴールラインに触れると3.5秒後にゴールを決められた方のフィールドにプレートが現れる。
@@ -45,9 +52,37 @@ public class Plate : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.transform.parent.name == "SelfHandle(Clone)")
+        {
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
+
+        if (collision.gameObject.transform.parent.name == "OpponentHandle(Clone)")
+        {
+            var sendData = new SyncPlateData(2, -rb.position, -rb.velocity);
+            NetproNetworkManager.Instance.SendTcp(sendData, null);
+        }
+    }
+
+
+
+    public void ApplyPositionAndVelocity(SyncPlateData data)
+    {
+        rb.transform.position = data.pos;
+        rb.velocity = data.vel;
+    }
+
     private IEnumerator DelayMethod(float waittime, System.Action action)
     {
         yield return new WaitForSeconds(waittime);
         action();
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("削除されました");
     }
 }
