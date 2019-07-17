@@ -65,11 +65,25 @@ public class Plate : ControllableMonoBehavior
         switch (other.gameObject.tag)
         {
             case TagName.OwnGoal:
+                BattleManager.Instance.ShowOwnGoalText();
+                BattleManager.Instance.GetOpponentPoint();
+
                 m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
                 {
+                    BattleManager.Instance.HideGoalText();
                     m_Rigidbody.position = new Vector3(m_StartPosition.x, m_StartPosition.y, m_StartPosition.z - 100);
                     m_Rigidbody.velocity = Vector3.zero;
                     SendSyncPlateData();
+                });
+                TimerManager.Instance.RegistTimer(m_GoalTimer);
+                break;
+
+                case TagName.Goal:
+                BattleManager.Instance.ShowGoalText();
+                BattleManager.Instance.GetOwnPoint();
+                m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
+                {
+                    BattleManager.Instance.HideGoalText();
                 });
                 TimerManager.Instance.RegistTimer(m_GoalTimer);
                 break;

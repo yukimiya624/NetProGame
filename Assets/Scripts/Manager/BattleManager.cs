@@ -71,6 +71,27 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     [SerializeField]
     private Text m_Text;
 
+    [SerializeField]
+    private Text m_OwnPointText;
+
+    [SerializeField]
+    private Text m_OpponentPointText;
+
+    [SerializeField]
+    private Text m_GoalText;
+
+    /// <summary>
+    /// 自分の持ち点
+    /// </summary>
+    [SerializeField]
+    private int m_OwnPoint;
+
+    /// <summary>
+    /// 敵の持ち点
+    /// </summary>
+    [SerializeField]
+    private int m_OpponentPoint;
+
     /// <summary>
     /// プレートの最初の位置
     /// </summary>
@@ -356,6 +377,37 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         m_SelfHandle.OnFixedUpdate();
         m_OpponentHandle.OnFixedUpdate();
         m_Plate.OnFixedUpdate();
+    }
+
+    public void GetOwnPoint()
+    {
+        m_OwnPoint++;
+        m_OwnPointText.text = m_OwnPoint.ToString();
+    }
+
+    public void GetOpponentPoint()
+    {
+        m_OpponentPoint++;
+        m_OpponentPointText.text = m_OpponentPoint.ToString();
+    }
+
+    public void ShowGoalText()
+    {
+        m_GoalText.enabled = true;
+        m_GoalText.text = "GOAL!!!!!!!!";
+        Debug.Log("Goal");
+    }
+
+    public void ShowOwnGoalText()
+    {
+        m_GoalText.enabled = true;
+        m_GoalText.text = "OWNGOAL!!!!!!!";
+        Debug.Log("OwnGoal");
+    }
+
+    public void HideGoalText()
+    {
+        m_GoalText.enabled = false;
     }
 
     private void OnEndBattle()
