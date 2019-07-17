@@ -12,10 +12,15 @@ public class StateMachine<T>
     private Dictionary<T, State<T>> m_States;
 
     private State<T> m_CurrentState;
+    private State<T> m_PreState;
+    private State<T> m_NextState;
 
     public StateMachine()
     {
         m_States = new Dictionary<T, State<T>>();
+        m_CurrentState = null;
+        m_PreState = null;
+        m_NextState = null;
     }
 
     public void OnFinalize()
@@ -26,6 +31,11 @@ public class StateMachine<T>
 
     public void OnUpdate()
     {
+        if (m_CurrentState != m_NextState)
+        {
+            ProcessChangeState();
+        }
+
         if (m_CurrentState != null)
         {
             EventUtility.SafeInvokeAction(m_CurrentState.m_OnUpdate);
@@ -46,6 +56,11 @@ public class StateMachine<T>
         {
             EventUtility.SafeInvokeAction(m_CurrentState.m_OnFixedUpdate);
         }
+    }
+
+    public State<T> GetCurrentState()
+    {
+        return m_CurrentState;
     }
 
     public void AddState(State<T> state)
@@ -70,18 +85,21 @@ public class StateMachine<T>
             return;
         }
 
-        var nextState = m_States[key];
+        m_NextState = m_States[key];
+    }
 
+    private void ProcessChangeState()
+    {
         if (m_CurrentState != null)
         {
-            EventUtility.SafeInvokeAction(m_CurrentState.m_OnEnd);
-            m_CurrentState = null;
+            m_PreState = m_CurrentState;
+            EventUtility.SafeInvokeAction(m_PreState.m_OnEnd);
         }
 
-        if (nextState != null)
+        if (m_NextState != null)
         {
-            EventUtility.SafeInvokeAction(nextState.m_OnStart);
-            m_CurrentState = nextState;
+            m_CurrentState = m_NextState;
+            EventUtility.SafeInvokeAction(m_CurrentState.m_OnStart);
         }
     }
 }

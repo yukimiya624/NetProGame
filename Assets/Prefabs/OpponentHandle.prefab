@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 416528687}
   - component: {fileID: 416528686}
   m_Layer: 2
-  m_Name: handle
-  m_TagString: Untagged
+  m_Name: Handle
+  m_TagString: OpponentHandle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -104,7 +104,7 @@ BoxCollider:
   m_GameObject: {fileID: 416528681}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 0.0198724, y: 0.019872406, z: 0.014619693}
   m_Center: {x: 0, y: 4.656614e-10, z: 0.0073098466}
@@ -120,7 +120,7 @@ GameObject:
   - component: {fileID: 4855701683599701225}
   m_Layer: 2
   m_Name: OpponentHandle
-  m_TagString: Untagged
+  m_TagString: OpponentHandle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -152,10 +152,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 425c928d48b72e04a800c00f9608bd9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSpeed: 10
-  MovableRangeX: {x: -Infinity, y: Infinity}
-  MovableRangeZ: {x: -Infinity, y: Infinity}
-  SpringStiffness: 1000
-  VelocityDamper: 100
-  DestinationDamper: 10
-  rb: {fileID: 416528687}

@@ -481,22 +481,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Managers:
-  - {fileID: 1779053149}
   - {fileID: 1779053150}
+  - {fileID: 1779053149}
   - {fileID: 1779053146}
   - {fileID: 1779053151}
-  m_SelfObj: {fileID: 1282314111}
-  m_OpponentObj: {fileID: 2084694967}
-  m_SendProtocolType: 1
-  m_PlatePrefab: {fileID: 2486181644825579552, guid: 16f67a7ac45261b48a192a1fc4a6ee4e,
-    type: 3}
-  m_SelfHandlePrefab: {fileID: 4576087891883698106, guid: 32e355d63e5d84244943e88ce2b2ff3f,
-    type: 3}
-  m_OpponentHandlePrefab: {fileID: 4855701683599701225, guid: 88b3324193d12ff4eb9a4e558927c743,
-    type: 3}
-  m_Plate: {fileID: 0}
-  m_SelfHandle: {fileID: 0}
-  m_OpponentHandle: {fileID: 0}
 --- !u!4 &1779053148
 Transform:
   m_ObjectHideFlags: 0
@@ -530,6 +518,12 @@ MonoBehaviour:
   m_StartScene: 1
   m_TransitionInfos:
   - CurrentScene: 0
+    NextScene: 1
+    AdditiveScene: 
+  - CurrentScene: 1
+    NextScene: 3
+    AdditiveScene: 
+  - CurrentScene: 3
     NextScene: 1
     AdditiveScene: 
   m_CurrentInfoNextScene: 0
@@ -596,7 +590,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 600, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1900104210
 MonoBehaviour:
@@ -611,7 +605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -620,18 +614,18 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 0
+    m_FontSize: 80
+    m_FontStyle: 1
     m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 0
+    m_MinSize: 8
+    m_MaxSize: 80
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: Loading...
 --- !u!222 &1900104211
 CanvasRenderer:
   m_ObjectHideFlags: 0
