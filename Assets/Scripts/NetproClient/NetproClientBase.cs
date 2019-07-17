@@ -147,7 +147,7 @@ public abstract class NetproClientBase
     /// </summary>
     /// <param name="data">送信したい文字列</param>
     /// <param name="failedSendCallback">送信に失敗した時のコールバック</param>
-    public abstract void SendData(string data, Action failedSendCallback);
+    public abstract void SendData(string data, Action<Exception> failedSendCallback);
 
     /// <summary>
     /// 現在溜めている受信データの数を取得する。
