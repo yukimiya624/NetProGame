@@ -374,6 +374,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     #endregion
 
 
+
     #region Connect Error
 
     private void OnStartConnectError()

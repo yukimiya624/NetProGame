@@ -20,6 +20,9 @@ public class SelfHandleController : ControllableMonoBehavior
     [SerializeField]
     Rigidbody m_Rigidbody;
 
+    [SerializeField]
+    private LayerMask m_GroundLayerMask;
+
     private Vector3 m_Destination;
 
 
@@ -100,7 +103,7 @@ public class SelfHandleController : ControllableMonoBehavior
         RaycastHit hitInfo = new RaycastHit();
 
         //Rayが当たった(地面がある)時
-        if (Physics.Raycast(pointToRay, out hitInfo))
+        if (Physics.Raycast(pointToRay, out hitInfo, 10000, m_GroundLayerMask.value))
         {
             //地面から0.01fだけ浮かせる;
             float x = hitInfo.point.x;
