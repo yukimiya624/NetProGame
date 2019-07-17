@@ -197,8 +197,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 19352969}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -300}
-  m_LocalScale: {x: 1000, y: 200, z: 20}
+  m_LocalPosition: {x: 0, y: 0, z: -320}
+  m_LocalScale: {x: 75, y: 200, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -215,7 +215,7 @@ GameObject:
   - component: {fileID: 125132860}
   - component: {fileID: 125132859}
   - component: {fileID: 125132858}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: SouthWestWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -699,7 +699,7 @@ MonoBehaviour:
   m_Text: {fileID: 1515323421}
   m_StartPlatePosition: {x: 0, y: 0, z: 0}
   m_CountDownTime: 3
-  m_BattleTime: 30
+  m_BattleTime: 60
 --- !u!1 &704267355
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,7 +712,7 @@ GameObject:
   - component: {fileID: 704267358}
   - component: {fileID: 704267357}
   - component: {fileID: 704267356}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ownGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -803,7 +803,7 @@ GameObject:
   - component: {fileID: 774914649}
   - component: {fileID: 774914648}
   - component: {fileID: 774914647}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: West Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -906,7 +906,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 912572556}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 6.5, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 704267359}
@@ -996,7 +996,7 @@ GameObject:
   - component: {fileID: 914261354}
   - component: {fileID: 914261353}
   - component: {fileID: 914261352}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: enemyGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1093,7 +1093,7 @@ GameObject:
   - component: {fileID: 1040856105}
   - component: {fileID: 1040856104}
   - component: {fileID: 1040856103}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: NorthWestWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1181,7 +1181,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1068659875}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: Walls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1378,7 +1378,7 @@ GameObject:
   - component: {fileID: 1336396888}
   - component: {fileID: 1336396887}
   - component: {fileID: 1336396886}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: SouthEastWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1469,7 +1469,7 @@ GameObject:
   - component: {fileID: 1500551096}
   - component: {fileID: 1500551095}
   - component: {fileID: 1500551094}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: 'East Wall '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1795,6 +1795,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: sikiri
       objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 8.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1825,7 +1833,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1851,12 +1859,8 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 8.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
-      propertyPath: m_LocalPosition.x
+    - target: {fileID: 2300000, guid: 6c9d8cb836825c644aa574ec4ceed251, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1873,7 +1877,7 @@ GameObject:
   - component: {fileID: 1876660158}
   - component: {fileID: 1876660157}
   - component: {fileID: 1876660156}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: NorthEastWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2212,8 +2216,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2084687024}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 600}
-  m_LocalScale: {x: 1000, y: 200, z: 20}
+  m_LocalPosition: {x: 0, y: 0, z: 320}
+  m_LocalScale: {x: 75, y: 200, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
