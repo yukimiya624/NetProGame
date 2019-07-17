@@ -66,12 +66,12 @@ public class NetproUdpClient : NetproClientBase
     /// </summary>
     /// <param name="data">送信したい文字列</param>
     /// <param name="failedSendCallback">送信に失敗した時のコールバック</param>
-    public override void SendData(string data, Action failedSendCallback)
+    public override void SendData(string data, Action<Exception> failedSendCallback)
     {
         if (UdpClient == null)
         {
             Debug.LogError("NetproUdpClient : UdpClientがありません。");
-            EventUtility.SafeInvokeAction(failedSendCallback);
+            EventUtility.SafeInvokeAction(failedSendCallback, null);
             return;
         }
 
@@ -81,23 +81,9 @@ public class NetproUdpClient : NetproClientBase
             var sendBytes = Encoding.UTF8.GetBytes(sendData);
             UdpClient.Send(sendBytes, sendBytes.Length, m_OpponentEndPoint);
         }
-        catch (ArgumentException ae)
+        catch (Exception e)
         {
-            Debug.LogError("送信データがnullです。");
-            Debug.LogException(ae);
-            EventUtility.SafeInvokeAction(failedSendCallback);
-        }
-        catch (SocketException se)
-        {
-            Debug.LogError("エラーが発生しました。");
-            Debug.LogException(se);
-            EventUtility.SafeInvokeAction(failedSendCallback);
-        }
-        catch (ObjectDisposedException ode)
-        {
-            Debug.LogError("ソケットが閉じられました。");
-            Debug.LogException(ode);
-            EventUtility.SafeInvokeAction(failedSendCallback);
+            EventUtility.SafeInvokeAction(failedSendCallback, e);
         }
     }
 

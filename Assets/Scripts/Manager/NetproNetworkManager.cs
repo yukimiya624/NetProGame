@@ -376,12 +376,12 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
     /// </summary>
     /// <param name="data">送信する構造体</param>
     /// <param name="onFailedCallback">失敗時コールバック</param>
-    public void SendTcp<T>(T data, Action onFailedCallback = null) where T : struct
+    public void SendTcp<T>(T data, Action<Exception> onFailedCallback = null) where T : struct
     {
         if (TcpClient == null)
         {
             Debug.LogError("Send TCP Error : TcpClientがnullです。");
-            EventUtility.SafeInvokeAction(onFailedCallback);
+            EventUtility.SafeInvokeAction(onFailedCallback, null);
             return;
         }
 
@@ -414,12 +414,12 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
     /// </summary>
     /// <param name="data">送信する構造体</param>
     /// <param name="onFailedCallback">失敗時コールバック</param>
-    public void SendUdp<T>(T data, Action onFailedCallback = null) where T : struct
+    public void SendUdp<T>(T data, Action<Exception> onFailedCallback = null) where T : struct
     {
         if (UdpClient == null)
         {
             Debug.LogError("Send UDP Error : UdpClientがnullです。");
-            EventUtility.SafeInvokeAction(onFailedCallback);
+            EventUtility.SafeInvokeAction(onFailedCallback, null);
             return;
         }
 
@@ -453,6 +453,13 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
 
     #region Match
 
+    private void ClearMatchProcessCallback()
+    {
+        m_MatchCallBack = null;
+        m_MatchWaitCallBack = null;
+        m_FailureMatchRequestCallBack = null;
+    }
+
     /// <summary>
     /// マッチリクエストを送る。
     /// </summary>
@@ -467,6 +474,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
         {
             Debug.LogError("Match Request Error : アドレスのパースに失敗しました。 address : " + address);
             EventUtility.SafeInvokeAction(failureRequestCallback);
+            ClearMatchProcessCallback();
             return;
         }
 
@@ -476,6 +484,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
         {
             Debug.LogError("Match Request Error : 自身のIPアドレスを取得できませんでした");
             EventUtility.SafeInvokeAction(failureRequestCallback);
+            ClearMatchProcessCallback();
             return;
         }
 
@@ -485,28 +494,24 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
 
         try
         {
-            m_MatchCallBack += seccessMatchCallback;
-            m_MatchWaitCallBack += matchWaitCallback;
-            m_FailureMatchRequestCallBack += failureRequestCallback;
+            m_MatchCallBack = seccessMatchCallback;
+            m_MatchWaitCallBack = matchWaitCallback;
+            m_FailureMatchRequestCallBack = failureRequestCallback;
             apiClient.UploadDataAsync(m_RemoteServerUrl, 5000, sendData, OnRequestMatch);
         }
         catch (ArgumentException ae)
         {
             Debug.LogError("Match Request Error :  アドレスが不正です。");
             Debug.LogException(ae);
-            m_MatchCallBack -= seccessMatchCallback;
-            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
-            m_FailureMatchRequestCallBack = null;
+            ClearMatchProcessCallback();
         }
         catch (WebException we)
         {
             Debug.Log("Match Request Error : エラーが発生しました。");
             Debug.LogException(we);
-            m_MatchCallBack -= seccessMatchCallback;
-            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
-            m_FailureMatchRequestCallBack = null;
+            ClearMatchProcessCallback();
         }
         finally
         {
@@ -530,7 +535,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
             {
                 Debug.LogError("Match Request Error : " + Encoding.UTF8.GetString(args.Result));
                 EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
-                m_FailureMatchRequestCallBack = null;
+                ClearMatchProcessCallback();
                 return;
             }
 
@@ -540,6 +545,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
                 AcceptTcpClient(SelfIpAddress, m_P2Pport, OnAcceptTcpClient);
                 Debug.Log("Open Master Client as " + SelfIpAddress);
                 EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
+                m_MatchWaitCallBack = null;
             }
             else if (receiveData.Message == "OPEN_CLIENT")
             {
@@ -557,6 +563,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
                 ConnectTcpClient(OpponentIpAddress, m_P2Pport, OnConnectTcpClient);
                 Debug.Log("Connect Master Client to " + OpponentIpAddress);
                 EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
+                m_MatchWaitCallBack = null;
             }
         }
         catch (SocketException se)
@@ -564,8 +571,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
             Debug.LogError("Match Request Error : エラーが発生しました。");
             Debug.LogException(se);
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
-            m_FailureMatchRequestCallBack = null;
-
+            ClearMatchProcessCallback();
         }
     }
 
@@ -592,6 +598,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
         CreateNetproTcpClient(tcpClient);
         CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
+        ClearMatchProcessCallback();
     }
 
     /// <summary>
@@ -610,6 +617,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
         CreateNetproTcpClient(tcpClient);
         CreateNetproUdpClient(IsMasterClient);
         EventUtility.SafeInvokeAction(m_MatchCallBack);
+        ClearMatchProcessCallback();
     }
 
     #endregion

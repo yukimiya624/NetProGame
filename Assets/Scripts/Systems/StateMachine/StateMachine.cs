@@ -75,6 +75,7 @@ public class StateMachine<T>
 
     public void Goto(T key)
     {
+        Debug.Log(key);
         if (m_States == null)
         {
             return;

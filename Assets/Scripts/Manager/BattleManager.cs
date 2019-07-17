@@ -166,7 +166,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
         var connectError = new State<E_STATE>(E_STATE.CONNECT_ERROR);
         m_StateMachine.AddState(connectError);
-        connectError.m_OnStart += OnStartSceneEntering;
+        connectError.m_OnStart += OnStartConnectError;
 
         m_StateMachine.Goto(E_STATE.SCENE_ENTERING);
     }
@@ -213,6 +213,12 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     {
         base.OnUpdate();
         m_StateMachine.OnUpdate();
+
+        var state = m_StateMachine.GetCurrentState();
+        if (state != null)
+        {
+            //Debug.Log("Current;" + state.m_Key);
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -309,7 +315,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         if (NetproNetworkManager.Instance.IsMasterClient)
         {
             var rad = UnityEngine.Random.Range(60, 120) * Mathf.Deg2Rad;
-            var sign = UnityEngine.Random.Range(0, 2) * 2 -1;
+            var sign = UnityEngine.Random.Range(0, 2) * 2 - 1;
             rad *= sign;
             var x = 100 * Mathf.Cos(rad);
             var z = 100 * Mathf.Sin(rad);
@@ -398,14 +404,20 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
             return;
         }
 
-        while (networkM.UdpClient.IsRemainReceivedData())
+        if (networkM.UdpClient != null)
         {
-            ProcessSwitchingData(networkM.ReceiveUdp());
+            while (networkM.UdpClient.IsRemainReceivedData())
+            {
+                ProcessSwitchingData(networkM.ReceiveUdp());
+            }
         }
 
-        while (networkM.TcpClient.IsRemainReceivedData())
+        if (networkM.TcpClient != null)
         {
-            ProcessSwitchingData(networkM.ReceiveTcp());
+            while (networkM.TcpClient.IsRemainReceivedData())
+            {
+                ProcessSwitchingData(networkM.ReceiveTcp());
+            }
         }
     }
 

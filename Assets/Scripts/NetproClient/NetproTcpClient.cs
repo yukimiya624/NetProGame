@@ -101,12 +101,12 @@ public class NetproTcpClient : NetproClientBase
     /// </summary>
     /// <param name="data">送信したい文字列</param>
     /// <param name="failedSendCallback">送信に失敗した時のコールバック</param>
-    public override void SendData(string data, Action failedSendCallback)
+    public override void SendData(string data, Action<Exception> failedSendCallback)
     {
         if (TcpClient == null)
         {
             Debug.LogError("NetproTcpClient : TcpClientがありません。");
-            EventUtility.SafeInvokeAction(failedSendCallback);
+            EventUtility.SafeInvokeAction(failedSendCallback, null);
             return;
         }
 
@@ -116,23 +116,9 @@ public class NetproTcpClient : NetproClientBase
             m_StreamWriter.WriteLine(sendData);
             m_StreamWriter.Flush();
         }
-        catch (ArgumentException ae)
+        catch (Exception e)
         {
-            Debug.LogError("送信データがnullです。");
-            Debug.LogException(ae);
-            EventUtility.SafeInvokeAction(failedSendCallback);
-        }
-        catch (SocketException se)
-        {
-            Debug.LogError("エラーが発生しました。");
-            Debug.LogException(se);
-            EventUtility.SafeInvokeAction(failedSendCallback);
-        }
-        catch (ObjectDisposedException ode)
-        {
-            Debug.LogError("ソケットが閉じられました。");
-            Debug.LogException(ode);
-            EventUtility.SafeInvokeAction(failedSendCallback);
+            EventUtility.SafeInvokeAction(failedSendCallback, e);
         }
     }
 
@@ -145,11 +131,10 @@ public class NetproTcpClient : NetproClientBase
 
         while (true)
         {
+            String str = null;
             try
             {
-                var str = m_StreamReader.ReadLine();
-                StockReceiveString(str);
-                EventUtility.SafeInvokeAction(OnReceive);
+                str = m_StreamReader.ReadLine();
             }
             catch (ObjectDisposedException ode)
             {
@@ -160,6 +145,17 @@ public class NetproTcpClient : NetproClientBase
             {
                 m_ErrorQueue.Enqueue(new ErrorData("エラーが発生しました。", se));
                 IsReceiveFailed = true;
+            }
+            catch(IOException ioe)
+            {
+                m_ErrorQueue.Enqueue(new ErrorData("エラーが発生しました。", ioe));
+                IsReceiveFailed = true;
+            }
+
+            if (!IsReceiveFailed)
+            {
+                StockReceiveString(str);
+                EventUtility.SafeInvokeAction(OnReceive);
             }
         }
     }
