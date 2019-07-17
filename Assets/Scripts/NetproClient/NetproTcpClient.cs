@@ -57,6 +57,10 @@ public class NetproTcpClient : NetproClientBase
             {
                 m_StreamReader.Close();
             }
+            catch (ObjectDisposedException)
+            {
+
+            }
             finally
             {
                 m_StreamReader = null;
@@ -68,6 +72,10 @@ public class NetproTcpClient : NetproClientBase
             try
             {
                 m_StreamWriter.Close();
+            }
+            catch (ObjectDisposedException)
+            {
+
             }
             finally
             {

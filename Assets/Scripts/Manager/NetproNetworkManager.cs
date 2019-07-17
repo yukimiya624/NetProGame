@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// クライアント通信の低レイヤーをサポートするマネージャ。
 /// Created by Sho Yamagami.
 /// </summary>
-public class NetproNetworkManager : MonoBehaviour
+public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
 {
 
     #region Field Inspector
@@ -49,6 +49,11 @@ public class NetproNetworkManager : MonoBehaviour
     private Action m_MatchCallBack;
 
     /// <summary>
+    /// マッチ待機開始時のコールバック。
+    /// </summary>
+    private Action m_MatchWaitCallBack;
+
+    /// <summary>
     /// マッチリクエストで何らかの失敗が発生した時のコールバック。
     /// </summary>
     private Action m_FailureMatchRequestCallBack;
@@ -58,12 +63,6 @@ public class NetproNetworkManager : MonoBehaviour
 
 
     #region Property
-
-    /// <summary>
-    /// 自身のインスタンス。
-    /// シングルトンパターンのために使用。
-    /// </summary>
-    public static NetproNetworkManager Instance { get; private set; }
 
     /// <summary>
     /// 自分がマスタークライアントかどうか。
@@ -98,57 +97,66 @@ public class NetproNetworkManager : MonoBehaviour
 
     #region Unity Callback
 
-    /// <summary>
-    /// このインスタンスの生成時の処理。
-    /// </summary>
-    private void Awake()
+    protected override void OnAwake()
     {
-        if (Instance)
-        {
-            Debug.LogWarning("NetworkManager is duplicate.");
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
+        base.OnAwake();
     }
 
     /// <summary>
     /// このインスタンスの破棄時の処理。
     /// </summary>
-    private void OnDestroy()
+    protected override void OnDestroyed()
     {
         CloseClients();
-        Instance = null;
+        base.OnDestroyed();
+    }
+
+    /// <summary>
+    /// 初期化処理。
+    /// </summary>
+    public override void OnInitialize()
+    {
+        base.OnInitialize();
+    }
+
+    /// <summary>
+    /// 終了処理。
+    /// </summary>
+    public override void OnFinalize()
+    {
+        base.OnFinalize();
     }
 
     /// <summary>
     /// このインスタンスが生成されてから最初のフレームで呼び出される。
     /// </summary>
-    private void Start()
+    public override void OnStart()
     {
+        base.OnStart();
     }
 
     /// <summary>
     /// 毎フレーム呼び出される。
     /// </summary>
-    private void Update()
+    public override void OnUpdate()
     {
+        base.OnUpdate();
     }
 
     /// <summary>
     /// 全てのUpdate()関数が呼び出された後に毎フレーム呼び出される。
     /// </summary>
-    private void LateUpdate()
+    public override void OnLateUpdate()
     {
+        base.OnLateUpdate();
     }
 
     /// <summary>
     /// 固定間隔で呼び出される。
     /// </summary>
-    private void FixedUpdate()
+    public override void OnFixedUpdate()
     {
+        base.OnFixedUpdate();
     }
 
     /// <summary>
@@ -450,8 +458,9 @@ public class NetproNetworkManager : MonoBehaviour
     /// </summary>
     /// <param name="address">マッチに用いる自身のIPv4アドレス</param>
     /// <param name="seccessMatchCallback">マッチに成功した時のコールバック</param>
+    /// <param name="matchWaitCallback">マッチ待機開始時のコールバック</param>
     /// <param name="failureRequestCallback">マッチに失敗した時のコールバック</param>
-    public void RequestMatch(string address, Action seccessMatchCallback, Action failureRequestCallback = null)
+    public void RequestMatch(string address, Action seccessMatchCallback, Action matchWaitCallback, Action failureRequestCallback = null)
     {
         IPAddress addr;
         if (!IPAddress.TryParse(address, out addr))
@@ -477,6 +486,7 @@ public class NetproNetworkManager : MonoBehaviour
         try
         {
             m_MatchCallBack += seccessMatchCallback;
+            m_MatchWaitCallBack += matchWaitCallback;
             m_FailureMatchRequestCallBack += failureRequestCallback;
             apiClient.UploadDataAsync(m_RemoteServerUrl, 5000, sendData, OnRequestMatch);
         }
@@ -485,6 +495,7 @@ public class NetproNetworkManager : MonoBehaviour
             Debug.LogError("Match Request Error :  アドレスが不正です。");
             Debug.LogException(ae);
             m_MatchCallBack -= seccessMatchCallback;
+            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
             m_FailureMatchRequestCallBack = null;
         }
@@ -493,6 +504,7 @@ public class NetproNetworkManager : MonoBehaviour
             Debug.Log("Match Request Error : エラーが発生しました。");
             Debug.LogException(we);
             m_MatchCallBack -= seccessMatchCallback;
+            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
             m_FailureMatchRequestCallBack = null;
         }
@@ -527,6 +539,7 @@ public class NetproNetworkManager : MonoBehaviour
                 // 他のクライアントを待ち受ける
                 AcceptTcpClient(SelfIpAddress, m_P2Pport, OnAcceptTcpClient);
                 Debug.Log("Open Master Client as " + SelfIpAddress);
+                EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
             }
             else if (receiveData.Message == "OPEN_CLIENT")
             {
@@ -543,6 +556,7 @@ public class NetproNetworkManager : MonoBehaviour
                 OpponentIpAddress = ipAddress;
                 ConnectTcpClient(OpponentIpAddress, m_P2Pport, OnConnectTcpClient);
                 Debug.Log("Connect Master Client to " + OpponentIpAddress);
+                EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
             }
         }
         catch (SocketException se)

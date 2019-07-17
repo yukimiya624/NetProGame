@@ -12,12 +12,15 @@ EditorBuildSettings:
     path: Assets/Scenes/PreLaunch.unity
     guid: 2423afc9d6b107e4385b8f3423e41b21
   - enabled: 1
-    path: Assets/Scenes/MatchLobby.unity
-    guid: ed2d495c100d61441a2a7d92a57deed2
+    path: Assets/Scenes/Title.unity
+    guid: 287bbaf1b62e5e14bb0a1d9ab25d4812
   - enabled: 1
-    path: Assets/Scenes/PreBattle.unity
-    guid: 15bd711134ec9524d8b8e3db002df5ca
+    path: Assets/Scenes/Match.unity
+    guid: 98d21699050de0c4fb76b146910b18f9
   - enabled: 1
     path: Assets/Scenes/Battle.unity
     guid: c3261feb25b65074c802d522904b5156
+  - enabled: 1
+    path: Assets/Scenes/Result.unity
+    guid: 376ae7503100fad4aa959ef01c2d1859
   m_configObjects: {}
