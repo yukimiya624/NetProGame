@@ -488,6 +488,15 @@ MonoBehaviour:
   m_SelfObj: {fileID: 1282314111}
   m_OpponentObj: {fileID: 2084694967}
   m_SendProtocolType: 1
+  m_PlatePrefab: {fileID: 2486181644825579552, guid: 16f67a7ac45261b48a192a1fc4a6ee4e,
+    type: 3}
+  m_SelfHandlePrefab: {fileID: 4576087891883698106, guid: 32e355d63e5d84244943e88ce2b2ff3f,
+    type: 3}
+  m_OpponentHandlePrefab: {fileID: 4855701683599701225, guid: 88b3324193d12ff4eb9a4e558927c743,
+    type: 3}
+  m_Plate: {fileID: 0}
+  m_SelfHandle: {fileID: 0}
+  m_OpponentHandle: {fileID: 0}
 --- !u!4 &1779053148
 Transform:
   m_ObjectHideFlags: 0

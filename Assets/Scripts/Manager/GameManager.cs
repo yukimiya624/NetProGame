@@ -48,6 +48,15 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
     [SerializeField]
     private E_PROTOCOL_TYPE m_SendProtocolType;
 
+    [SerializeField]
+    private Plate m_PlatePrefab;
+
+    [SerializeField]
+    private SelfHandleController m_SelfHandlePrefab;
+
+    [SerializeField]
+    private OpponentHandleController m_OpponentHandlePrefab;
+
 #pragma warning restore 649
     #endregion
 
@@ -65,6 +74,15 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
     /// これの使い方が適当なので注意。
     /// </summary>
     private bool m_IsTransition;
+
+    [SerializeField]
+    private Plate m_Plate;
+
+    [SerializeField]
+    private SelfHandleController m_SelfHandle;
+
+    [SerializeField]
+    private OpponentHandleController m_OpponentHandle;
 
     #endregion
 
@@ -207,7 +225,16 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
         if (m_IsTransition)
         {
             m_State = E_State.BATTLE;
-            SceneManager.LoadScene("PreBattle");
+
+            SceneManager.LoadScene("Battle");
+
+            m_Plate = Instantiate(m_PlatePrefab);
+            m_SelfHandle = Instantiate(m_SelfHandlePrefab);
+            m_OpponentHandle = Instantiate(m_OpponentHandlePrefab);
+
+            DontDestroyOnLoad(m_Plate);
+            DontDestroyOnLoad(m_SelfHandle);
+            DontDestroyOnLoad(m_OpponentHandle);
         }
     }
 
@@ -222,30 +249,98 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
             m_State = E_State.BATTLE_DISCONNECTED;
         }
 
-        if (m_SelfObj)
+        //if (m_Plate)
+        //{
+        //    //var platePos = new 
+
+        //    var PlatePos = m_Plate.transform.position;
+        //    PlatePos += m_Plate.transform.position - PlatePos;
+        //    m_Plate.transform.position = PlatePos;
+
+        //    // 座標を送信する
+        //    SendPosition(PlatePos);
+        //}
+
+        //if (m_OpponentObj)
+        //{
+        //    // 座標を受信する
+        //    var pos = ReceivePosition();
+        //    if (pos == null)
+        //    {
+        //        return;
+        //    }
+
+        //    m_OpponentObj.transform.position = (Vector3)pos;
+        //}
+
+        while (NetproNetworkManager.Instance.TcpClient.IsRemainReceivedData())
         {
-            var x = Input.GetAxis("Horizontal");
-            var y = Input.GetAxis("Vertical");
+            //var receivedUDPData = NetproNetworkManager.Instance.ReceiveUdp();
+            var receivedTCPData = NetproNetworkManager.Instance.ReceiveTcp();
 
-            var pos = m_SelfObj.transform.position;
-            pos += new Vector3(x, y, 0);
-            m_SelfObj.transform.position = pos;
 
-            // 座標を送信する
-            SendPosition(pos);
-        }
+            //if (receivedUDPData == null)
+            //{
+            //    continue;
+            //}
 
-        if (m_OpponentObj)
-        {
-            // 座標を受信する
-            var pos = ReceivePosition();
-            if (pos == null)
+            //if (receivedUDPData is SyncHandleData handleData)
+            //{
+            //    if (m_SelfHandle != null)
+            //    {
+            //        if (NetproNetworkManager.Instance.IsMasterClient && handleData.id == 0)
+            //        {
+            //            m_SelfHandle.ApplyPosition(handleData);
+            //        }
+
+            //        if(!NetproNetworkManager.Instance.IsMasterClient && handleData.id == 1)
+            //        {
+            //            m_SelfHandle.ApplyPosition(handleData);
+            //        }
+            //    }
+            //}
+
+            if (receivedTCPData == null)
             {
-                return;
+                continue;
             }
 
-            m_OpponentObj.transform.position = (Vector3)pos;
+
+            if (receivedTCPData is SyncPlateData plateData)
+            {
+                if (m_Plate != null)
+                {
+                    if (NetproNetworkManager.Instance.IsMasterClient)
+                    {
+                        m_Plate.ApplyPositionAndVelocity(plateData);
+                    }
+
+                    if (!NetproNetworkManager.Instance.IsMasterClient)
+                    {
+                        m_Plate.ApplyPositionAndVelocity(plateData);
+                    }
+
+                }
+            }
+
+            if (receivedTCPData is SyncHandleData handleData)
+            {
+                if (m_OpponentHandle != null)
+                {
+                    Debug.Log(handleData.id+":"+handleData.pos);
+                    if (NetproNetworkManager.Instance.IsMasterClient && handleData.id == 0)
+                    {
+                        m_OpponentHandle.ApplyPosition(handleData);
+                    }
+
+                    if (!NetproNetworkManager.Instance.IsMasterClient && handleData.id == 1)
+                    {
+                        m_OpponentHandle.ApplyPosition(handleData);
+                    }
+                }
+            }
         }
+    
     }
 
     /// <summary>

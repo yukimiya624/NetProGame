@@ -83,13 +83,13 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
     /// 対戦相手との通信に用いるTcpクライアント。
     /// 確実に通信したい場合に用いる。
     /// </summary>
-    private NetproTcpClient TcpClient { get; set; }
+    public NetproTcpClient TcpClient { get; private set; }
 
     /// <summary>
     /// 対戦相手との通信に用いるUdpクライアント。
     /// リアルタイム通信したい場合に用いる。
     /// </summary>
-    private NetproUdpClient UdpClient { get; set; }
+    public NetproUdpClient UdpClient { get; private set; }
 
     #endregion
 
