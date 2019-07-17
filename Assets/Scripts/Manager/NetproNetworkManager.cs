@@ -49,6 +49,11 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
     private Action m_MatchCallBack;
 
     /// <summary>
+    /// マッチ待機開始時のコールバック。
+    /// </summary>
+    private Action m_MatchWaitCallBack;
+
+    /// <summary>
     /// マッチリクエストで何らかの失敗が発生した時のコールバック。
     /// </summary>
     private Action m_FailureMatchRequestCallBack;
@@ -453,8 +458,9 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
     /// </summary>
     /// <param name="address">マッチに用いる自身のIPv4アドレス</param>
     /// <param name="seccessMatchCallback">マッチに成功した時のコールバック</param>
+    /// <param name="matchWaitCallback">マッチ待機開始時のコールバック</param>
     /// <param name="failureRequestCallback">マッチに失敗した時のコールバック</param>
-    public void RequestMatch(string address, Action seccessMatchCallback, Action failureRequestCallback = null)
+    public void RequestMatch(string address, Action seccessMatchCallback, Action matchWaitCallback, Action failureRequestCallback = null)
     {
         IPAddress addr;
         if (!IPAddress.TryParse(address, out addr))
@@ -480,6 +486,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
         try
         {
             m_MatchCallBack += seccessMatchCallback;
+            m_MatchWaitCallBack += matchWaitCallback;
             m_FailureMatchRequestCallBack += failureRequestCallback;
             apiClient.UploadDataAsync(m_RemoteServerUrl, 5000, sendData, OnRequestMatch);
         }
@@ -488,6 +495,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
             Debug.LogError("Match Request Error :  アドレスが不正です。");
             Debug.LogException(ae);
             m_MatchCallBack -= seccessMatchCallback;
+            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
             m_FailureMatchRequestCallBack = null;
         }
@@ -496,6 +504,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
             Debug.Log("Match Request Error : エラーが発生しました。");
             Debug.LogException(we);
             m_MatchCallBack -= seccessMatchCallback;
+            m_MatchWaitCallBack -= matchWaitCallback;
             EventUtility.SafeInvokeAction(m_FailureMatchRequestCallBack);
             m_FailureMatchRequestCallBack = null;
         }
@@ -530,6 +539,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
                 // 他のクライアントを待ち受ける
                 AcceptTcpClient(SelfIpAddress, m_P2Pport, OnAcceptTcpClient);
                 Debug.Log("Open Master Client as " + SelfIpAddress);
+                EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
             }
             else if (receiveData.Message == "OPEN_CLIENT")
             {
@@ -546,6 +556,7 @@ public class NetproNetworkManager : SingletonMonoBehavior<NetproNetworkManager>
                 OpponentIpAddress = ipAddress;
                 ConnectTcpClient(OpponentIpAddress, m_P2Pport, OnConnectTcpClient);
                 Debug.Log("Connect Master Client to " + OpponentIpAddress);
+                EventUtility.SafeInvokeAction(m_MatchWaitCallBack);
             }
         }
         catch (SocketException se)

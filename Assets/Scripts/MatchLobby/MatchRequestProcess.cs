@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 /// <summary>
 /// マッチリクエストを行うための一連の処理をまとめたコンポーネント。
@@ -18,6 +19,8 @@ public class MatchRequestProcess : MonoBehaviour
     private Button m_RequestMatchButton;
 
 #pragma warning restore 649
+
+    public Action<string> OnClickMatchRequest { get; set; }
 
     private void Start()
     {
@@ -49,6 +52,6 @@ public class MatchRequestProcess : MonoBehaviour
     {
         var idx = m_AddressDropdown.value;
         var data = m_AddressDropdown.options[idx];
-        GameManager.Instance.RequestMatch(data.text);
+        EventUtility.SafeInvokeAction(OnClickMatchRequest, data.text);
     }
 }

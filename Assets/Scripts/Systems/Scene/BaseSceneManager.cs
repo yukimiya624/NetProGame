@@ -275,7 +275,6 @@ public class BaseSceneManager : SingletonMonoBehavior<BaseSceneManager>
 	/// <returns></returns>
 	private IEnumerator LoadSceneSequence( TransitionInfo info, E_SCENE nextScene, List<E_SCENE> nextAdditiveScenes = null )
 	{
-
 		if( nextScene < 0 )
 		{
 			yield break;
@@ -290,20 +289,20 @@ public class BaseSceneManager : SingletonMonoBehavior<BaseSceneManager>
 		SetSceneCycle( E_SCENE_CYCLE.OUT );
 		yield return OnBeforeTransition( ( scene, callback ) => scene.OnBeforeHide( callback ) );
 
-		// フェードアウト処理
-		//if( fadeOut != null )
-		//{
-		//	var obj = Instantiate( info.FadeOutEffect );
-		//	yield return StartCoroutine( obj.FadeOut() );
-		//	Destroy( obj );
-		//}
+        // フェードアウト処理
+        //if( fadeOut != null )
+        //{
+        //	var obj = Instantiate( info.FadeOutEffect );
+        //	yield return StartCoroutine( obj.FadeOut() );
+        //	Destroy( obj );
+        //}
 
-		////ロード画面生成
-		//var loadingObj = Instantiate( info.LoadingEffect );
+        ////ロード画面生成
+        //var loadingObj = Instantiate( info.LoadingEffect );
 
-		//bool isCompleteTransition = false;
-		//TransitionManager.Instance.Hide( () => isCompleteTransition = true );
-		//yield return new WaitUntil( () => isCompleteTransition );
+        bool isCompleteTransition = false;
+        TransitionManager.Instance.Hide(() => isCompleteTransition = true);
+        yield return new WaitUntil(() => isCompleteTransition);
 
 		yield return OnBeforeTransition( ( scene, callback ) => scene.OnAfterHide( callback ) );
 
@@ -312,28 +311,28 @@ public class BaseSceneManager : SingletonMonoBehavior<BaseSceneManager>
 
 		List<AsyncOperation> asyncList = OnLoadScene();
 
-		yield return WaitForLoadingScenes( asyncList );
+        yield return WaitForLoadingScenes( asyncList );
 		yield return WaitForRegisteringScenes();
 
-		//ロード完了通知
-		//loadingObj.OnLoadComplete();
+        //ロード完了通知
+        //loadingObj.OnLoadComplete();
 
-		SetSceneCycle( E_SCENE_CYCLE.IN );
+        SetSceneCycle( E_SCENE_CYCLE.IN );
 		yield return OnAfterTransition( ( scene, callback ) => scene.OnBeforeShow( callback ) );
 
-		//フェードイン処理
-		//if( fadeIn != null )
-		//{
-		//	var obj = Instantiate( info.FadeInEffect );
-		//	yield return StartCoroutine( obj.FadeIn() );
-		//	Destroy( obj );
-		//}
+        //フェードイン処理
+        //if( fadeIn != null )
+        //{
+        //	var obj = Instantiate( info.FadeInEffect );
+        //	yield return StartCoroutine( obj.FadeIn() );
+        //	Destroy( obj );
+        //}
 
-		//isCompleteTransition = false;
-		//TransitionManager.Instance.Show( () => isCompleteTransition = true );
-		//yield return new WaitUntil( () => isCompleteTransition );
+        isCompleteTransition = false;
+        TransitionManager.Instance.Show(() => isCompleteTransition = true);
+        yield return new WaitUntil(() => isCompleteTransition);
 
-		yield return OnAfterTransition( ( scene, callback ) => scene.OnAfterShow( callback ) );
+        yield return OnAfterTransition( ( scene, callback ) => scene.OnAfterShow( callback ) );
 		SetSceneCycle( E_SCENE_CYCLE.STANDBY );
 	}
 
@@ -424,7 +423,6 @@ public class BaseSceneManager : SingletonMonoBehavior<BaseSceneManager>
 	{
 		List<AsyncOperation> asyncList = new List<AsyncOperation>();
 		asyncList.Add( SceneManager.LoadSceneAsync( ( int )m_CurrentInfoNextScene ) );
-
 		if( m_CurrentInfoNextAdditiveScenes != null )
 		{
 			foreach( var scene in m_CurrentInfoNextAdditiveScenes )

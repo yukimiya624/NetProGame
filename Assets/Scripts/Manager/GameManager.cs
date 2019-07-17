@@ -143,8 +143,6 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
     public override void OnStart()
     {
         m_Managers.ForEach((m) => m.OnStart());
-
-        BaseSceneManager.Instance.LoadOnGameStart();
     }
 
     public override void OnUpdate()
