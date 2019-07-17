@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 416528681}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: -2.2, z: 0}
-  m_LocalScale: {x: 1000, y: 1000, z: 1000}
+  m_LocalScale: {x: 1300, y: 1300, z: 1300}
   m_Children: []
   m_Father: {fileID: 1783439110}
   m_RootOrder: 0
@@ -156,6 +156,8 @@ MonoBehaviour:
   SpringStiffness: 1000
   VelocityDamper: 100
   DestinationDamper: 10
+  m_RestrictMinPos: {x: -160, y: -289}
+  m_RestrictMaxPos: {x: 160, y: -11}
   m_Rigidbody: {fileID: 416528687}
   m_GroundLayerMask:
     serializedVersion: 2
