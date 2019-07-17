@@ -266,21 +266,18 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         m_CountDownTimer.SetIntervalCallBack(OnIntervalCountDown);
         m_CountDownTimer.SetTimeoutCallBack(OnTimeoutCountDown);
         TimerManager.Instance.RegistTimer(m_CountDownTimer);
-        Debug.Log("カウントダウン開始");
     }
 
     private void OnIntervalCountDown()
     {
         m_CountDown--;
         m_Text.text = m_CountDown.ToString();
-        Debug.Log(m_CountDown);
     }
 
     private void OnTimeoutCountDown()
     {
         m_StateMachine.Goto(E_STATE.BATTLE_START);
         m_Text.text = "<color=#ff0000>BATTLE START!</color>";
-        Debug.Log("カウントダウン終了");
     }
 
     #endregion
@@ -292,7 +289,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     private void OnStartBattleStart()
     {
         m_StateMachine.Goto(E_STATE.BATTLE);
-        Debug.Log("バトル開始");
     }
 
     #endregion
@@ -312,9 +308,11 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         // プレートの投げ入れ
         if (NetproNetworkManager.Instance.IsMasterClient)
         {
-            Debug.Log("投げ入れ");
-            var x = UnityEngine.Random.Range(-100.0f, 100.0f);
-            var z = UnityEngine.Random.Range(-100.0f, 100.0f);
+            var rad = UnityEngine.Random.Range(60, 120) * Mathf.Deg2Rad;
+            var sign = UnityEngine.Random.Range(0, 2) * 2 -1;
+            rad *= sign;
+            var x = 100 * Mathf.Cos(rad);
+            var z = 100 * Mathf.Sin(rad);
             Vector3 force = new Vector3(x, 0.0f, z);
             m_Plate.InitPlate(m_StartPlatePosition, force);
         }
@@ -324,7 +322,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     {
         m_BattleCountDown--;
         m_Text.text = m_BattleCountDown.ToString();
-        Debug.Log("残り時間:" + m_BattleCountDown);
     }
 
     private void OnTimeoutBattle()
@@ -448,7 +445,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     {
         if (m_Plate != null)
         {
-            Debug.Log(plateData.pos);
             m_Plate.ApplySyncPlateData(plateData);
         }
     }

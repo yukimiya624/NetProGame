@@ -13,4 +13,6 @@ public static class TagName
 	public const string SelfHandle = "SelfHandle";
 	public const string OpponentHandle = "OpponentHandle";
 	public const string Plate = "Plate";
+	public const string Goal = "Goal";
+	public const string OwnGoal = "OwnGoal";
 }

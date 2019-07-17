@@ -7,6 +7,8 @@ TagManager:
   - SelfHandle
   - OpponentHandle
   - Plate
+  - Goal
+  - OwnGoal
   layers:
   - Default
   - TransparentFX
