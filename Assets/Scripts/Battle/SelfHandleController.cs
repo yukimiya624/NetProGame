@@ -17,6 +17,18 @@ public class SelfHandleController : ControllableMonoBehavior
     [SerializeField, Range(0.0f, 10000.0f)]
     private float DestinationDamper = 10.0f;
 
+    /// <summary>
+    /// ハンドルの左下制限座標
+    /// </summary>
+    [SerializeField]
+    private Vector2 m_RestrictMinPos;
+
+    /// <summary>
+    /// ハンドルの右上制限座標
+    /// </summary>
+    [SerializeField]
+    private Vector2 m_RestrictMaxPos;
+
     [SerializeField]
     Rigidbody m_Rigidbody;
 
@@ -88,32 +100,12 @@ public class SelfHandleController : ControllableMonoBehavior
     private void SetDestination(Vector3 screenPoint)
     {
         Vector2 mPos = Input.mousePosition;
+        Vector3 pos = GetViewportWorldPoint(mPos.x, mPos.y, 0);
 
-        if (mPos.x < 0 || mPos.x > Screen.width || mPos.y < 0 || mPos.y > Screen.height)
-        {
-            return;
-        }
+        pos.x = Mathf.Clamp(pos.x, m_RestrictMinPos.x, m_RestrictMaxPos.x);
+        pos.z = Mathf.Clamp(pos.z, m_RestrictMinPos.y, m_RestrictMaxPos.y);
 
-        mPos.x = Mathf.Clamp(mPos.x, 0.0f, Screen.width);
-        mPos.y = Mathf.Clamp(mPos.y, 0.0f, Screen.height);
-
-        Camera gameCamera = Camera.main;
-        Ray pointToRay = gameCamera.ScreenPointToRay(mPos);
-
-        RaycastHit hitInfo = new RaycastHit();
-
-        //Rayが当たった(地面がある)時
-        if (Physics.Raycast(pointToRay, out hitInfo, 10000, m_GroundLayerMask.value))
-        {
-            //地面から0.01fだけ浮かせる;
-            float x = hitInfo.point.x;
-            float y = hitInfo.point.y + 0.01f;
-            float z = hitInfo.point.z;
-
-            Vector3 place = new Vector3(x, y, z);
-
-            this.m_Destination = place;
-        }
+        m_Destination = pos;
     }
 
     private Vector3 GetSpringForce()
@@ -139,5 +131,21 @@ public class SelfHandleController : ControllableMonoBehavior
         var damperForceMagnitude = Mathf.Min(velocityDamperForceMagnitude + destinationDamperForceMagnitude, momentumThreshold);
 
         return springForce - (damperForceMagnitude * velocityDirection); ;
+    }
+
+    /// <summary>
+    /// ビューポート座標からワールド座標に変換する。
+    /// </summary>
+    /// <param name="baseHeight">無限平面の高さ</param>
+    private Vector3 GetViewportWorldPoint(float x, float y, float baseHeight)
+    {
+        var camera = Camera.main;
+        Vector3 farPos = camera.ScreenToWorldPoint(new Vector3(x, y, camera.nearClipPlane));
+        Vector3 originPos = camera.transform.position;
+        Vector3 dir = (farPos - originPos).normalized;
+
+        Vector3 axis = Vector3.up;
+        float h = Vector3.Dot(new Vector3(0, baseHeight, 0), axis);
+        return originPos + dir * (h - Vector3.Dot(axis, originPos)) / (Vector3.Dot(axis, dir));
     }
 }
