@@ -189,6 +189,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         var countDown = new State<E_STATE>(E_STATE.COUNT_DOWN);
         m_StateMachine.AddState(countDown);
         countDown.m_OnStart += OnStartCountDown;
+        countDown.m_OnUpdate += OnUpdateCountDown;
 
         var battleStart = new State<E_STATE>(E_STATE.BATTLE_START);
         m_StateMachine.AddState(battleStart);
@@ -315,10 +316,20 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         TimerManager.Instance.RegistTimer(m_CountDownTimer);
     }
 
+    private void OnUpdateCountDown()
+    {
+        ProcessReceivedData();
+    }
+
     private void OnIntervalCountDown()
     {
         m_CountDown--;
         m_Text.text = m_CountDown.ToString();
+        if (NetproNetworkManager.Instance.IsMasterClient)
+        {
+            SyncCountDownData data = new SyncCountDownData(m_CountDown, DateTime.Now);
+            NetproNetworkManager.Instance.SendTcp(data ,null);
+        }
     }
 
     private void OnTimeoutCountDown()
@@ -546,6 +557,10 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         {
             OnReceivedSyncThrowInData(throwInData);
         }
+        else if (data is SyncCountDownData countDownData)
+        {
+            OnReceiveCountDown(countDownData);
+        }
         else if (data is SyncTimeUpData timeUpData)
         {
             OnReceivedSyncTimeUpData(timeUpData);
@@ -593,6 +608,26 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         if (m_Plate != null)
         {
             m_Plate.ApplySyncThrowInData(throwInData);
+        }
+    }
+
+
+
+    private void OnReceiveCountDown(SyncCountDownData countDownData)
+    {
+        if (!NetproNetworkManager.Instance.IsMasterClient)
+        {
+            Debug.Log("受け取った時間："+ DateTime.Now);
+            TimeSpan Lug = DateTime.Now - countDownData.SendTime;
+            Debug.Log("ラグは：" + Lug.Milliseconds);
+            m_Text.text = countDownData.CountDown.ToString();
+
+            var timer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 1 - Lug.Milliseconds / 1000f);
+            timer.SetTimeoutCallBack(OnIntervalCountDown);
+            if(m_CountDown == 0)
+            {
+                OnTimeoutCountDown();
+            } 
         }
     }
 

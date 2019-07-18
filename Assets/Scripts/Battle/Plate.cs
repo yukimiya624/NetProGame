@@ -94,7 +94,7 @@ public class Plate : ControllableMonoBehavior
                 m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
                 {
                     BattleManager.Instance.HideGoalText();
-                    BattleManager.Instance.ThrowPlate(this, UnityEngine.Random.Range(0, 2) == 0, NetproNetworkManager.Instance.IsMasterClient);
+                    BattleManager.Instance.ThrowPlate(this, UnityEngine.Random.Range(0, 2) == 0, true);
                 });
                 TimerManager.Instance.RegistTimer(m_GoalTimer);
                 break;
