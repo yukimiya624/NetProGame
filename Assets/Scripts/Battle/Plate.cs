@@ -78,7 +78,7 @@ public class Plate : ControllableMonoBehavior
                 TimerManager.Instance.RegistTimer(m_GoalTimer);
                 break;
 
-                case TagName.Goal:
+            case TagName.Goal:
                 BattleManager.Instance.ShowGoalText();
                 BattleManager.Instance.GetOwnPoint();
                 m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
