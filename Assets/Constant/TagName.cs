@@ -15,4 +15,5 @@ public static class TagName
 	public const string Plate = "Plate";
 	public const string Goal = "Goal";
 	public const string OwnGoal = "OwnGoal";
+	public const string Ground = "Ground";
 }

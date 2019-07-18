@@ -9,6 +9,7 @@ TagManager:
   - Plate
   - Goal
   - OwnGoal
+  - Ground
   layers:
   - Default
   - TransparentFX

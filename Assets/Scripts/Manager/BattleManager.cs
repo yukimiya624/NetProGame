@@ -50,6 +50,8 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     #region Field Inspector
 #pragma warning disable 649
 
+    [Header("Prefab")]
+
     /// <summary>
     /// 自身のハンドルオブジェクトのプレハブ
     /// </summary>
@@ -67,6 +69,25 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// </summary>
     [SerializeField]
     private Plate m_PlatePrefab;
+
+    [Header("Hopper")]
+
+    [SerializeField]
+    private Transform m_RightLeftHopper;
+
+    [SerializeField]
+    private Transform m_RightRightHopper;
+
+    [SerializeField]
+    private Transform m_LeftLeftHopper;
+
+    [SerializeField]
+    private Transform m_LeftRightHopper;
+
+    [SerializeField]
+    private float m_HopperVelocity;
+
+    [Header("UI")]
 
     [SerializeField]
     private Text m_Text;
@@ -277,7 +298,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         m_Plate.OnInitialize();
 
         m_StateMachine.Goto(E_STATE.COUNT_DOWN);
-        Debug.Log("シーン遷移");
     }
 
     #endregion
@@ -332,16 +352,11 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         m_BattleTimer.SetTimeoutCallBack(OnTimeoutBattle);
         TimerManager.Instance.RegistTimer(m_BattleTimer);
 
+        m_Plate.SetDisplay(true);
         // プレートの投げ入れ
         if (NetproNetworkManager.Instance.IsMasterClient)
         {
-            var rad = UnityEngine.Random.Range(60, 120) * Mathf.Deg2Rad;
-            var sign = UnityEngine.Random.Range(0, 2) * 2 - 1;
-            rad *= sign;
-            var x = 100 * Mathf.Cos(rad);
-            var z = 100 * Mathf.Sin(rad);
-            Vector3 force = new Vector3(x, 0.0f, z);
-            m_Plate.InitPlate(m_StartPlatePosition, force);
+            ThrowPlate(m_Plate, UnityEngine.Random.Range(0, 2) == 0, true);
         }
     }
 
@@ -442,6 +457,40 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     {
         BaseSceneManager.Instance.LoadScene(BaseSceneManager.E_SCENE.TITLE);
         Debug.LogWarning("通信が断絶されました。");
+    }
+
+    #endregion
+
+
+
+    #region Plate
+
+    /// <summary>
+    /// プレートを投げ入れる
+    /// </summary>
+    public void ThrowPlate(Plate plate, bool isLeft, bool isMasterSide)
+    {
+        Transform hopper = null;
+        if (isLeft)
+        {
+            hopper = isMasterSide ? m_LeftRightHopper : m_LeftLeftHopper;
+        } else
+        {
+            hopper = isMasterSide ? m_RightLeftHopper : m_RightRightHopper;
+        }
+
+        if (hopper == null)
+        {
+            Debug.LogError("ホッパーがありません。");
+            return;
+        }
+
+        plate.SetRigidbodyMode(false);
+        var data = new SyncPlateData();
+        data.pos = hopper.position;
+        data.vel = hopper.forward * m_HopperVelocity;
+        plate.ApplySyncPlateData(data);
+        plate.SendThrowingSyncPlateData();
     }
 
     #endregion
