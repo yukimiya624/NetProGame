@@ -43,6 +43,12 @@ public class TitleManager : SingletonMonoBehavior<TitleManager>
     [SerializeField]
     private Text m_MatchWaitText;
 
+    /// <summary>
+    /// ゲーム終了ボタン
+    /// </summary>
+    [SerializeField]
+    private Button m_GameEndButton;
+
 #pragma warning restore 649
     #endregion
 
@@ -74,6 +80,8 @@ public class TitleManager : SingletonMonoBehavior<TitleManager>
         match.m_OnStart += OnStartMatch;
 
         m_StateMachine.Goto(E_STATE.SCENE_ENTERING);
+
+        m_GameEndButton.onClick.AddListener(Application.Quit);
     }
 
     public override void OnFinalize()

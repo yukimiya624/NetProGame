@@ -230,7 +230,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
 --- !u!114 &1293074887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,7 +272,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 9999
   m_TargetDisplay: 0
 --- !u!1 &1328319683
 GameObject:
@@ -433,6 +433,15 @@ MonoBehaviour:
   - CurrentScene: 3
     NextScene: 1
     AdditiveScene: 
+  - CurrentScene: 3
+    NextScene: 4
+    AdditiveScene: 
+  - CurrentScene: 4
+    NextScene: 1
+    AdditiveScene: 
+  - CurrentScene: 4
+    NextScene: 3
+    AdditiveScene: 
   m_CurrentInfoNextScene: 0
   m_CurrentInfoNextAdditiveScenes: 
   m_CurrentScene: {fileID: 0}
@@ -513,7 +522,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -592,7 +601,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
