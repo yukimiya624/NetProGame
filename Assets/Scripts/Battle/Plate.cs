@@ -8,6 +8,9 @@ using UnityEngine;
 /// </summary>
 public class Plate : ControllableMonoBehavior
 {
+    #region Field Inspector
+#pragma warning disable 649
+
     /// <summary>
     /// レンダラ
     /// </summary>
@@ -21,24 +24,52 @@ public class Plate : ControllableMonoBehavior
     private Rigidbody m_Rigidbody;
 
     /// <summary>
+    /// プレート本体のコライダ
+    /// </summary>
+    [SerializeField]
+    private Collider m_PlateCollider;
+
+    /// <summary>
     /// プレートの見た目に近い平たいコライダ
     /// </summary>
     [SerializeField]
     private Collider m_PlateBoxCollider;
 
     /// <summary>
-    /// 開始時の座標
+    /// 地面に触れるためのコライダ
     /// </summary>
-    private Vector3 m_StartPosition;
+    [SerializeField]
+    private Collider m_PlateTouchCollider;
+
+    /// <summary>
+    /// 投げ入れ時のコールバック制御
+    /// </summary>
+    [SerializeField]
+    private PlateThrownColliderController m_PlateThrownColliderController;
+
+#pragma warning restore 649
+    #endregion
+
+
 
     /// <summary>
     /// ゴールした時のタイマー
     /// </summary>
     private Timer m_GoalTimer;
 
+    /// <summary>
+    /// ゴールフラグ
+    /// </summary>
     private bool m_IsGoal;
 
+
+
+    /// <summary>
+    /// プレートID
+    /// </summary>
     public int PlateId { get; set; }
+
+
 
     /// <summary>
     /// 初期化処理
@@ -46,6 +77,8 @@ public class Plate : ControllableMonoBehavior
     public override void OnInitialize()
     {
         base.OnInitialize();
+        m_PlateThrownColliderController.SetGroundTouchCallback(OnTriggerEnterGround);
+
         m_IsGoal = false;
         SetDisplay(false);
     }
@@ -63,6 +96,11 @@ public class Plate : ControllableMonoBehavior
         base.OnFinalize();
     }
 
+    private void OnTriggerEnterGround()
+    {
+        SetRigidbodyMode(true);
+    }
+
     //ゴールラインに触れると3.5秒後にゴールを決められた方のフィールドにプレートが現れる。
     private void OnTriggerEnter(Collider other)
     {
@@ -75,10 +113,12 @@ public class Plate : ControllableMonoBehavior
                 }
 
                 m_IsGoal = true;
+                Debug.Log(NetproNetworkManager.Instance.IsMasterClient);
 
                 BattleManager.Instance.ShowOwnGoalText();
                 BattleManager.Instance.GetOpponentPoint();
 
+                SetDisplay(false);
                 SendGoalData();
                 m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
                 {
@@ -120,10 +160,6 @@ public class Plate : ControllableMonoBehavior
         {
             case TagName.SelfHandle:
                 SendSyncPlateData();
-                break;
-            case TagName.Ground:
-                m_PlateBoxCollider.enabled = false;
-                SetRigidbodyMode(true);
                 break;
         }
     }
@@ -204,12 +240,17 @@ public class Plate : ControllableMonoBehavior
     public void SetRigidbodyMode(bool isEnable)
     {
         m_PlateBoxCollider.enabled = !isEnable;
+        m_PlateTouchCollider.enabled = !isEnable;
+        m_PlateCollider.enabled = isEnable;
         m_Rigidbody.useGravity = !isEnable;
 
         if (isEnable)
         {
-            m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
             m_Rigidbody.MoveRotation(Quaternion.Euler(0, 0, 0));
+            var pos = m_Rigidbody.position;
+            pos.y = 0;
+            m_Rigidbody.position = pos;
+            m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         }
         else
         {

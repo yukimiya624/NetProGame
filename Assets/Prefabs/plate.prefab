@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4390949744453243415}
   - component: {fileID: 6336779472541147290}
   - component: {fileID: 7133951996469682069}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: Plate
   m_TagString: Plate
   m_Icon: {fileID: 0}
@@ -122,6 +122,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8808403288719047460}
+  - {fileID: 2917363405245277584}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -139,7 +140,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Renderer: {fileID: 6336779472541147290}
   m_Rigidbody: {fileID: 2944816336920269835}
+  m_PlateCollider: {fileID: 4961867492840741477}
   m_PlateBoxCollider: {fileID: 7133951996469682069}
+  m_PlateTouchCollider: {fileID: 18135487599959421}
+  m_PlateThrownColliderController: {fileID: 7569979666021923845}
 --- !u!54 &2944816336920269835
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -170,3 +174,62 @@ CapsuleCollider:
   m_Height: 40
   m_Direction: 1
   m_Center: {x: 0, y: 18, z: 0}
+--- !u!1 &7436228653763171058
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2917363405245277584}
+  - component: {fileID: 18135487599959421}
+  - component: {fileID: 7569979666021923845}
+  m_Layer: 11
+  m_Name: ThrownDummyCollider
+  m_TagString: Plate
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2917363405245277584
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7436228653763171058}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 791141080}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &18135487599959421
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7436228653763171058}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 12
+  m_Height: 40
+  m_Direction: 1
+  m_Center: {x: 0, y: 18, z: 0}
+--- !u!114 &7569979666021923845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7436228653763171058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 241b22b70c445ff4fbeead8b8cc764f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Collider: {fileID: 18135487599959421}

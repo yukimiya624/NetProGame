@@ -22,9 +22,9 @@ TagManager:
   - Ground
   - StageObject
   - Wall
-  - 
-  - 
-  - 
+  - PlateDummy
+  - Handle
+  - PlateView
   - 
   - 
   - 

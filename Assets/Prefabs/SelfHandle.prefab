@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5644906378293039831}
   - component: {fileID: 4384617697188389899}
   - component: {fileID: 7422133222478620682}
-  m_Layer: 9
+  m_Layer: 12
   m_Name: Handle
   m_TagString: SelfHandle
   m_Icon: {fileID: 0}
@@ -89,7 +89,7 @@ GameObject:
   - component: {fileID: 4576087891883698106}
   - component: {fileID: 8423912645572514553}
   - component: {fileID: 967173506863853716}
-  m_Layer: 9
+  m_Layer: 12
   m_Name: SelfHandle
   m_TagString: SelfHandle
   m_Icon: {fileID: 0}

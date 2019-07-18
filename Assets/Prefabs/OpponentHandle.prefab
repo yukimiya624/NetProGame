@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7422133222478620682}
   - component: {fileID: 416528687}
   - component: {fileID: 416528686}
-  m_Layer: 9
+  m_Layer: 12
   m_Name: Handle
   m_TagString: OpponentHandle
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8004047621479938976}
   - component: {fileID: 4855701683599701225}
-  m_Layer: 9
+  m_Layer: 12
   m_Name: OpponentHandle
   m_TagString: OpponentHandle
   m_Icon: {fileID: 0}

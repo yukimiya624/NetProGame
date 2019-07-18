@@ -11,6 +11,9 @@ public static class LayerName
 	public const int Ground = 8;
 	public const int StageObject = 9;
 	public const int Wall = 10;
+	public const int PlateDummy = 11;
+	public const int Handle = 12;
+	public const int PlateView = 13;
 	public const int DefaultMask = 1;
 	public const int TransparentFXMask = 2;
 	public const int IgnoreRaycastMask = 4;
@@ -19,4 +22,7 @@ public static class LayerName
 	public const int GroundMask = 256;
 	public const int StageObjectMask = 512;
 	public const int WallMask = 1024;
+	public const int PlateDummyMask = 2048;
+	public const int HandleMask = 4096;
+	public const int PlateViewMask = 8192;
 }
