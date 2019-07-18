@@ -24,6 +24,16 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
 
 
 
+    #region Property
+
+    public int SelfGainPoint { get; private set; }
+
+    public int OpponentGainPoint { get; private set; }
+
+    #endregion
+
+
+
     #region Unity Callback
 
     protected override void OnAwake()
@@ -89,5 +99,19 @@ public class GameManager : GlobalSingletonMonoBehavior<GameManager>
     }
 
     #endregion
+
+
+
+
+    /// <summary>
+    /// 得点をセットする
+    /// </summary>
+    /// <param name="selfGainPoint">自分の得点</param>
+    /// <param name="opponentGainPoint">相手の得点</param>
+    public void SetBattleResult(int selfGainPoint, int opponentGainPoint)
+    {
+        SelfGainPoint = selfGainPoint;
+        OpponentGainPoint = opponentGainPoint;
+    }
 }
 

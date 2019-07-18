@@ -353,7 +353,12 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
     private void OnTimeoutBattle()
     {
-        m_StateMachine.Goto(E_STATE.BATTLE_END);
+        // マスタークライアントだけ通常通りゲームエンドする
+        if (NetproNetworkManager.Instance.IsMasterClient)
+        {
+            NetproNetworkManager.Instance.SendTcp(new SyncTimeUpData());
+            m_StateMachine.Goto(E_STATE.BATTLE_END);
+        }
     }
 
     private void OnUpdateBattle()
@@ -422,7 +427,8 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
     private void OnStartBattleEnd()
     {
-        BaseSceneManager.Instance.LoadScene(BaseSceneManager.E_SCENE.TITLE);
+        GameManager.Instance.SetBattleResult(m_OwnPoint, m_OpponentPoint);
+        BaseSceneManager.Instance.LoadScene(BaseSceneManager.E_SCENE.RESULT);
         Debug.Log("バトル終了");
     }
 
@@ -476,7 +482,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// <summary>
     /// 受信したデータを各処理に振り分ける処理
     /// </summary>
-    /// <param name="data"></param>
     private void ProcessSwitchingData(object data)
     {
         if (data == null) return;
@@ -488,6 +493,10 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         else if (data is SyncPlateData plateData)
         {
             OnReceivedSyncPlateData(plateData);
+        }
+        else if (data is SyncTimeUpData timeUpData)
+        {
+            OnReceivedSyncTimeUpData(timeUpData);
         }
     }
 
@@ -510,6 +519,18 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         if (m_Plate != null)
         {
             m_Plate.ApplySyncPlateData(plateData);
+        }
+    }
+
+    /// <summary>
+    /// タイムアップデータを受け取った時の処理
+    /// </summary>
+    private void OnReceivedSyncTimeUpData(SyncTimeUpData timeUpData)
+    {
+        // マスタークライアントではない方がタイムアップを受け取ったらバトル終了
+        if (!NetproNetworkManager.Instance.IsMasterClient)
+        {
+            m_StateMachine.Goto(E_STATE.BATTLE_END);
         }
     }
 
