@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8808403288719047460}
   - component: {fileID: 4390949744453243415}
   - component: {fileID: 6336779472541147290}
+  - component: {fileID: 7133951996469682069}
   m_Layer: 9
   m_Name: Plate
   m_TagString: Plate
@@ -77,6 +78,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &7133951996469682069
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188905042}
+  m_Material: {fileID: 13400000, guid: 25c6ec4142c4aff448ababf2a8546de4, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.047387283, y: 0.047279123, z: 0.006076209}
+  m_Center: {x: -0.00003327802, y: 0, z: -0.0011494418}
 --- !u!1 &1463059067428959672
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,7 +137,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73517ca0324e3814b86b2381a7e60a01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Renderer: {fileID: 6336779472541147290}
   m_Rigidbody: {fileID: 2944816336920269835}
+  m_PlateBoxCollider: {fileID: 7133951996469682069}
 --- !u!54 &2944816336920269835
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -138,7 +154,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 116
+  m_Constraints: 0
   m_CollisionDetection: 1
 --- !u!136 &4961867492840741477
 CapsuleCollider:
@@ -153,4 +169,4 @@ CapsuleCollider:
   m_Radius: 12
   m_Height: 40
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 18, z: 0}

@@ -47,7 +47,7 @@ public class SelfHandleController : ControllableMonoBehavior
         base.OnInitialize();
 
         var pos = new Vector3(0, 0, -100);
-        m_Rigidbody.position = pos;
+        transform.position = pos;
         m_Rigidbody.isKinematic = false;
 
         m_Destination = pos;
@@ -71,7 +71,7 @@ public class SelfHandleController : ControllableMonoBehavior
         SetDestination(Input.mousePosition);
 
         // テーブルの中心を点対象として敵の画面に投影されるため、XZを反対にする
-        var posData = new Vector3(-m_Rigidbody.position.x, m_Rigidbody.position.y, -m_Rigidbody.position.z);
+        var posData = new Vector3(-transform.position.x, transform.position.y, -transform.position.z);
 
         SyncHandleData handleData;
         if (NetproNetworkManager.Instance.IsMasterClient)
@@ -100,6 +100,12 @@ public class SelfHandleController : ControllableMonoBehavior
     private void SetDestination(Vector3 screenPoint)
     {
         Vector2 mPos = Input.mousePosition;
+
+        if (mPos.x < 0 || mPos.x > Screen.width || mPos.y < 0 || mPos.y > Screen.height)
+        {
+            return;
+        }
+
         Vector3 pos = GetViewportWorldPoint(mPos.x, mPos.y, 0);
 
         pos.x = Mathf.Clamp(pos.x, m_RestrictMinPos.x, m_RestrictMaxPos.x);

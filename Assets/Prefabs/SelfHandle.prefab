@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 5644906378293039831}
   - component: {fileID: 4384617697188389899}
   - component: {fileID: 7422133222478620682}
-  - component: {fileID: 416528687}
-  - component: {fileID: 3204840159750068409}
   m_Layer: 9
   m_Name: Handle
   m_TagString: SelfHandle
@@ -79,36 +77,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!54 &416528687
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 416528681}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 3.57
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 116
-  m_CollisionDetection: 3
---- !u!136 &3204840159750068409
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 416528681}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.0099362
-  m_Height: 0.12
-  m_Direction: 2
-  m_Center: {x: 0, y: 4.656614e-10, z: 0.0073098466}
 --- !u!1 &4747412663091674702
 GameObject:
   m_ObjectHideFlags: 0
@@ -119,6 +87,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1783439110}
   - component: {fileID: 4576087891883698106}
+  - component: {fileID: 8423912645572514553}
+  - component: {fileID: 967173506863853716}
   m_Layer: 9
   m_Name: SelfHandle
   m_TagString: SelfHandle
@@ -158,7 +128,37 @@ MonoBehaviour:
   DestinationDamper: 10
   m_RestrictMinPos: {x: -160, y: -289}
   m_RestrictMaxPos: {x: 160, y: -11}
-  m_Rigidbody: {fileID: 416528687}
+  m_Rigidbody: {fileID: 8423912645572514553}
   m_GroundLayerMask:
     serializedVersion: 2
     m_Bits: 256
+--- !u!54 &8423912645572514553
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4747412663091674702}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 3.57
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 116
+  m_CollisionDetection: 3
+--- !u!136 &967173506863853716
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4747412663091674702}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 13
+  m_Height: 80
+  m_Direction: 1
+  m_Center: {x: 0, y: 38, z: 0}
