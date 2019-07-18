@@ -86,17 +86,14 @@ public class Plate : ControllableMonoBehavior
                 }
 
                 m_IsGoal = true;
-                SetRigidbodyMode(false);
-                SetDisplay(false);
 
                 BattleManager.Instance.ShowOwnGoalText();
                 BattleManager.Instance.GetOpponentPoint();
 
+                SendGoalData();
                 m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
                 {
-                    m_IsGoal = false;
                     BattleManager.Instance.HideGoalText();
-                    SetDisplay(true);
                     BattleManager.Instance.ThrowPlate(this, UnityEngine.Random.Range(0, 2) == 0, NetproNetworkManager.Instance.IsMasterClient);
                 });
                 TimerManager.Instance.RegistTimer(m_GoalTimer);
@@ -109,19 +106,17 @@ public class Plate : ControllableMonoBehavior
                 }
 
                 m_IsGoal = true;
-                SetRigidbodyMode(false);
-                SetDisplay(false);
 
                 BattleManager.Instance.ShowGoalText();
                 BattleManager.Instance.GetOwnPoint();
 
-                m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
-                {
-                    m_IsGoal = false;
-                    BattleManager.Instance.HideGoalText();
-                    SetDisplay(true);
-                });
-                TimerManager.Instance.RegistTimer(m_GoalTimer);
+                SetDisplay(false);
+                //m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
+                //{
+                //    m_IsGoal = false;
+                //    BattleManager.Instance.HideGoalText();
+                //});
+                //TimerManager.Instance.RegistTimer(m_GoalTimer);
                 break;
         }
     }
@@ -158,22 +153,7 @@ public class Plate : ControllableMonoBehavior
         m_Renderer.enabled = isEnable;
     }
 
-    /// <summary>
-    /// 投げ入れる時の通信処理
-    /// </summary>
-    public void SendThrowingSyncPlateData()
-    {
-        var pos = m_Rigidbody.position;
-        pos.x *= -1;
-        pos.z *= -1;
-        var vel = m_Rigidbody.velocity;
-        vel.x *= -1;
-        vel.z *= -1;
-        var sendData = new SyncPlateData(2, pos, vel);
-        NetproNetworkManager.Instance.SendTcp(sendData, null);
-    }
-
-    public void SendSyncPlateData()
+    private void SendSyncPlateData()
     {
         var pos = m_Rigidbody.position;
         pos.x *= -1;
@@ -182,11 +162,53 @@ public class Plate : ControllableMonoBehavior
         NetproNetworkManager.Instance.SendTcp(sendData, null);
     }
 
+    private void SendGoalData()
+    {
+        var data = new SyncGoalData();
+        NetproNetworkManager.Instance.SendTcp(data, null);
+    }
+
+    public void SendThrowInData(Vector3 pos, Vector3 vel)
+    {
+        m_IsGoal = false;
+        SetRigidbodyMode(false);
+        SetDisplay(true);
+
+        m_Rigidbody.position = pos;
+        m_Rigidbody.velocity = vel;
+
+        pos.x *= -1;
+        pos.z *= -1;
+        vel.x *= -1;
+        vel.z *= -1;
+        
+        var data = new SyncThrowInData();
+        data.Pos = pos;
+        data.Vel = vel;
+
+        NetproNetworkManager.Instance.SendTcp(data, null);
+    }
+
     public void ApplySyncPlateData(SyncPlateData data)
     {
-        Debug.Log(data.vel);
         m_Rigidbody.position = data.pos;
         m_Rigidbody.velocity = data.vel;
+    }
+
+    public void ApplySyncGoalData(SyncGoalData data)
+    {
+        SetRigidbodyMode(false);
+        SetDisplay(false);
+    }
+
+    public void ApplySyncThrowInData(SyncThrowInData data)
+    {
+        BattleManager.Instance.HideGoalText();
+        m_IsGoal = false;
+        SetRigidbodyMode(false);
+        SetDisplay(true);
+        m_Rigidbody.position = data.Pos;
+        m_Rigidbody.velocity = data.Vel;
     }
 
     /// <summary>
@@ -202,7 +224,8 @@ public class Plate : ControllableMonoBehavior
         {
             m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
             m_Rigidbody.MoveRotation(Quaternion.Euler(0, 0, 0));
-        } else
+        }
+        else
         {
             m_Rigidbody.constraints = RigidbodyConstraints.None;
         }

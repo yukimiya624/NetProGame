@@ -485,12 +485,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
             return;
         }
 
-        plate.SetRigidbodyMode(false);
-        var data = new SyncPlateData();
-        data.pos = hopper.position;
-        data.vel = hopper.forward * m_HopperVelocity;
-        plate.ApplySyncPlateData(data);
-        plate.SendThrowingSyncPlateData();
+        plate.SendThrowInData(hopper.position, hopper.forward * m_HopperVelocity);
     }
 
     #endregion
@@ -543,6 +538,14 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         {
             OnReceivedSyncPlateData(plateData);
         }
+        else if (data is SyncGoalData goalData)
+        {
+            OnReceivedSyncGoalData(goalData);
+        }
+        else if (data is SyncThrowInData throwInData)
+        {
+            OnReceivedSyncThrowInData(throwInData);
+        }
         else if (data is SyncTimeUpData timeUpData)
         {
             OnReceivedSyncTimeUpData(timeUpData);
@@ -568,6 +571,28 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         if (m_Plate != null)
         {
             m_Plate.ApplySyncPlateData(plateData);
+        }
+    }
+
+    /// <summary>
+    /// ゴールデータを受け取った時の処理
+    /// </summary>
+    private void OnReceivedSyncGoalData(SyncGoalData goalData)
+    {
+        if (m_Plate != null)
+        {
+            m_Plate.ApplySyncGoalData(goalData);
+        }
+    }
+
+    /// <summary>
+    /// 投げ入れデータを受け取った時の処理
+    /// </summary>
+    private void OnReceivedSyncThrowInData(SyncThrowInData throwInData)
+    {
+        if (m_Plate != null)
+        {
+            m_Plate.ApplySyncThrowInData(throwInData);
         }
     }
 
