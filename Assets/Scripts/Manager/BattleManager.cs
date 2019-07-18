@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
+using System.Linq;
 
 /// <summary>
 /// Battleシーンを管理するマネージャ。
@@ -131,6 +131,12 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     [SerializeField]
     private int m_BattleTime;
 
+    /// <summary>
+    /// プレートを新しく投げ入れるバトル開始からの経過時間
+    /// </summary>
+    [SerializeField]
+    private float[] m_NewPlateThrownTimes;
+
 #pragma warning restore 649
     #endregion
 
@@ -156,7 +162,7 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// <summary>
     /// プレートオブジェクト
     /// </summary>
-    private Plate m_Plate;
+    private List<Plate> m_Plates;
 
     /// <summary>
     /// カウントダウンタイマー
@@ -167,6 +173,11 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// バトル中のタイマー
     /// </summary>
     private Timer m_BattleTimer;
+
+    /// <summary>
+    /// プレートを投げ入れるためのタイマー
+    /// </summary>
+    private List<Timer> m_ThrownPlateTimers;
 
     private int m_CountDown;
 
@@ -181,6 +192,9 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     public override void OnInitialize()
     {
         base.OnInitialize();
+
+        m_Plates = new List<Plate>();
+
         m_StateMachine = new StateMachine<E_STATE>();
         var sceneEntering = new State<E_STATE>(E_STATE.SCENE_ENTERING);
         m_StateMachine.AddState(sceneEntering);
@@ -230,10 +244,13 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
             m_OpponentHandle = null;
         }
 
-        if (m_Plate)
+        if (m_Plates != null)
         {
-            m_Plate.OnFinalize();
-            m_Plate = null;
+            foreach (var p in m_Plates)
+            {
+                p.OnFinalize();
+            }
+            m_Plates = null;
         }
 
         if (m_CountDownTimer != null)
@@ -248,6 +265,15 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
             m_BattleTimer = null;
         }
 
+        if (m_ThrownPlateTimers != null)
+        {
+            foreach (var t in m_ThrownPlateTimers)
+            {
+                t.DestroyTimer();
+            }
+            m_ThrownPlateTimers = null;
+        }
+
         base.OnFinalize();
     }
 
@@ -255,12 +281,6 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     {
         base.OnUpdate();
         m_StateMachine.OnUpdate();
-
-        var state = m_StateMachine.GetCurrentState();
-        if (state != null)
-        {
-            //Debug.Log("Current;" + state.m_Key);
-        }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -289,13 +309,11 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
     private void OnStartSceneEntering()
     {
-        m_Plate = Instantiate(m_PlatePrefab);
         m_SelfHandle = Instantiate(m_SelfHandlePrefab);
         m_OpponentHandle = Instantiate(m_OpponentHandlePrefab);
 
         m_SelfHandle.OnInitialize();
         m_OpponentHandle.OnInitialize();
-        m_Plate.OnInitialize();
 
         m_StateMachine.Goto(E_STATE.COUNT_DOWN);
     }
@@ -352,11 +370,15 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         m_BattleTimer.SetTimeoutCallBack(OnTimeoutBattle);
         TimerManager.Instance.RegistTimer(m_BattleTimer);
 
-        m_Plate.SetDisplay(true);
-        // プレートの投げ入れ
         if (NetproNetworkManager.Instance.IsMasterClient)
         {
-            ThrowPlate(m_Plate, UnityEngine.Random.Range(0, 2) == 0, true);
+            m_ThrownPlateTimers = new List<Timer>();
+            foreach (var t in m_NewPlateThrownTimes)
+            {
+                var timer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, t, ThrowNewPlate);
+                TimerManager.Instance.RegistTimer(timer);
+                m_ThrownPlateTimers.Add(timer);
+            }
         }
     }
 
@@ -382,21 +404,33 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
         m_SelfHandle.OnUpdate();
         m_OpponentHandle.OnUpdate();
-        m_Plate.OnUpdate();
+
+        foreach (var p in m_Plates)
+        {
+            p.OnUpdate();
+        }
     }
 
     private void OnLateUpdateBattle()
     {
         m_SelfHandle.OnLateUpdate();
         m_OpponentHandle.OnLateUpdate();
-        m_Plate.OnLateUpdate();
+
+        foreach (var p in m_Plates)
+        {
+            p.OnLateUpdate();
+        }
     }
 
     private void OnFixedUpdateBattle()
     {
         m_SelfHandle.OnFixedUpdate();
         m_OpponentHandle.OnFixedUpdate();
-        m_Plate.OnFixedUpdate();
+
+        foreach (var p in m_Plates)
+        {
+            p.OnFixedUpdate();
+        }
     }
 
     public void GetOwnPoint()
@@ -465,6 +499,24 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
 
     #region Plate
 
+    private Plate CreatePlate(int id)
+    {
+        var plate = Instantiate(m_PlatePrefab);
+        plate.OnInitialize();
+        plate.PlateId = id;
+        m_Plates.Add(plate);
+        return plate;
+    }
+
+    /// <summary>
+    /// プレートを新規に投げ入れる
+    /// </summary>
+    private void ThrowNewPlate()
+    {
+        var plate = CreatePlate(m_Plates.Count);
+        ThrowPlate(plate, UnityEngine.Random.Range(0, 2) == 0, UnityEngine.Random.Range(0, 2) == 0);
+    }
+
     /// <summary>
     /// プレートを投げ入れる
     /// </summary>
@@ -474,7 +526,8 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
         if (isLeft)
         {
             hopper = isMasterSide ? m_LeftRightHopper : m_LeftLeftHopper;
-        } else
+        }
+        else
         {
             hopper = isMasterSide ? m_RightLeftHopper : m_RightRightHopper;
         }
@@ -568,9 +621,13 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// </summary>
     private void OnReceivedSyncPlateData(SyncPlateData plateData)
     {
-        if (m_Plate != null)
+        if (m_Plates != null)
         {
-            m_Plate.ApplySyncPlateData(plateData);
+            var plate = m_Plates.Find(p => p.PlateId == plateData.id);
+            if (plate != null)
+            {
+                plate.ApplySyncPlateData(plateData);
+            }
         }
     }
 
@@ -579,9 +636,13 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// </summary>
     private void OnReceivedSyncGoalData(SyncGoalData goalData)
     {
-        if (m_Plate != null)
+        if (m_Plates != null)
         {
-            m_Plate.ApplySyncGoalData(goalData);
+            var plate = m_Plates.Find(p => p.PlateId == goalData.Id);
+            if (plate != null)
+            {
+                plate.ApplySyncGoalData(goalData);
+            }
         }
     }
 
@@ -590,9 +651,15 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     /// </summary>
     private void OnReceivedSyncThrowInData(SyncThrowInData throwInData)
     {
-        if (m_Plate != null)
+        if (m_Plates != null)
         {
-            m_Plate.ApplySyncThrowInData(throwInData);
+            var plate = m_Plates.Find(p => p.PlateId == throwInData.Id);
+            if (plate == null)
+            {
+                plate = CreatePlate(throwInData.Id);
+            }
+
+            plate.ApplySyncThrowInData(throwInData);
         }
     }
 

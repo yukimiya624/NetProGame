@@ -38,6 +38,8 @@ public class Plate : ControllableMonoBehavior
 
     private bool m_IsGoal;
 
+    public int PlateId { get; set; }
+
     /// <summary>
     /// 初期化処理
     /// </summary>
@@ -60,19 +62,6 @@ public class Plate : ControllableMonoBehavior
 
         base.OnFinalize();
     }
-
-    //public override void OnFixedUpdate()
-    //{
-    //    base.OnFixedUpdate();
-    //    if (m_InitSync)
-    //    {
-    //        if (m_Rigidbody.velocity.sqrMagnitude > 0)
-    //        {
-    //            m_InitSync = false;
-    //            SendThrowingSyncPlateData();
-    //        }
-    //    }
-    //}
 
     //ゴールラインに触れると3.5秒後にゴールを決められた方のフィールドにプレートが現れる。
     private void OnTriggerEnter(Collider other)
@@ -111,12 +100,6 @@ public class Plate : ControllableMonoBehavior
                 BattleManager.Instance.GetOwnPoint();
 
                 SetDisplay(false);
-                //m_GoalTimer = Timer.CreateTimeoutTimer(E_TIMER_TYPE.SCALED_TIMER, 3.5f, () =>
-                //{
-                //    m_IsGoal = false;
-                //    BattleManager.Instance.HideGoalText();
-                //});
-                //TimerManager.Instance.RegistTimer(m_GoalTimer);
                 break;
         }
     }
@@ -158,13 +141,15 @@ public class Plate : ControllableMonoBehavior
         var pos = m_Rigidbody.position;
         pos.x *= -1;
         pos.z *= -1;
-        var sendData = new SyncPlateData(2, pos, -m_Rigidbody.velocity);
-        NetproNetworkManager.Instance.SendTcp(sendData, null);
+        var data = new SyncPlateData(2, pos, -m_Rigidbody.velocity);
+        data.id = PlateId;
+        NetproNetworkManager.Instance.SendTcp(data, null);
     }
 
     private void SendGoalData()
     {
         var data = new SyncGoalData();
+        data.Id = PlateId;
         NetproNetworkManager.Instance.SendTcp(data, null);
     }
 
@@ -185,6 +170,7 @@ public class Plate : ControllableMonoBehavior
         var data = new SyncThrowInData();
         data.Pos = pos;
         data.Vel = vel;
+        data.Id = PlateId;
 
         NetproNetworkManager.Instance.SendTcp(data, null);
     }
