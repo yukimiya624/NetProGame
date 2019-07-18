@@ -399,14 +399,14 @@ public class BattleManager : SingletonMonoBehavior<BattleManager>
     public void ShowGoalText()
     {
         m_GoalText.enabled = true;
-        m_GoalText.text = "GOAL!!!!!!!!";
+        m_GoalText.text = "GOAL!!!!!!!!\n敵の陣地にパドルが再出現します";
         Debug.Log("Goal");
     }
 
     public void ShowOwnGoalText()
     {
         m_GoalText.enabled = true;
-        m_GoalText.text = "OWNGOAL!!!!!!!";
+        m_GoalText.text = "GOAL.......\n自分の陣地にパドルが再出現します";
         Debug.Log("OwnGoal");
     }
 
