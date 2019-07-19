@@ -126,8 +126,8 @@ MonoBehaviour:
   SpringStiffness: 1000
   VelocityDamper: 100
   DestinationDamper: 10
-  m_RestrictMinPos: {x: -160, y: -289}
-  m_RestrictMaxPos: {x: 160, y: -11}
+  m_RestrictMinPos: {x: -155, y: -284}
+  m_RestrictMaxPos: {x: 155, y: -11}
   m_Rigidbody: {fileID: 8423912645572514553}
   m_GroundLayerMask:
     serializedVersion: 2

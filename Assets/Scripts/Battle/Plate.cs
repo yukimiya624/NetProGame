@@ -119,6 +119,7 @@ public class Plate : ControllableMonoBehavior
         switch (collision.gameObject.tag)
         {
             case TagName.SelfHandle:
+            case TagName.Plate:
                 SendSyncPlateData();
                 break;
             case TagName.Ground:
